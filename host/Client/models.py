@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Client(models.Model):
     name= models.CharField(max_length=200,default='',null=True,blank=True)
     identification= models.CharField(max_length=200,default='',null=True,blank=True)
