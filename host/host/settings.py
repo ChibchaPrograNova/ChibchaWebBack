@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Employee',
     'Client',
-    'Admin',
     'Pay',
+    'Admin'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'host.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dbhost',
+        'NAME': 'dbhosting',
         'USER': 'admin',
         'PASSWORD': '12345',
         'HOST': 'localhost',
