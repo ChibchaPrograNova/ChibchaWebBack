@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.CharField(blank=True, default='', max_length=200, null=True)),
-                ('method', models.IntegerField(blank=True, default='', max_length=3, null=True)),
+                ('method', models.IntegerField(default=0)),
                 ('id_Client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Client.client')),
             ],
         ),
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, default='', max_length=200, null=True)),
-                ('amount', models.IntegerField(blank=True, default='', max_length=3, null=True)),
+                ('amount', models.IntegerField(default=0)),
                 ('date', models.DateTimeField(default=django.utils.timezone.now)),
                 ('id_Card', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Pay.card')),
                 ('id_Client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Client.client')),

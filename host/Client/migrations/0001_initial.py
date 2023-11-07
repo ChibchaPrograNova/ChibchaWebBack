@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('identification', models.CharField(blank=True, default='', max_length=200, null=True)),
                 ('address', models.CharField(blank=True, default='', max_length=100, null=True)),
                 ('mail', models.CharField(blank=True, default='', max_length=100, null=True)),
-                ('age', models.IntegerField(blank=True, default='', max_length=3, null=True)),
+                ('age', models.IntegerField(default=0)),
                 ('country', models.CharField(blank=True, default='', max_length=20, null=True)),
             ],
         ),
