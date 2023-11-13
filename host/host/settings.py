@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'host.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dbhosting',
-        'USER': 'admin',
-        'PASSWORD': '12345',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'aBdbADd5C64BA-fEAfggG3-BF54344B3',
+        'HOST': 'viaduct.proxy.rlwy.net',
+        'PORT': '24062',
     }
 }
 
