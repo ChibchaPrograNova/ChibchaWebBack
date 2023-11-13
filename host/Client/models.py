@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Client(models.Model):
@@ -12,10 +13,15 @@ class Client(models.Model):
         return self.name
 
 class Plan(models.Model):
+    PLAN_TYPES = [
+        ('Plata', 'Plata'),
+        ('Platino', 'Platino'),
+        ('Oro', 'Oro'),
+    ]
     name= models.CharField(max_length=200,default='',null=True,blank=True)
-    date_start= models.CharField(max_length=200,default='',null=True,blank=True)
-    date_end= models.CharField(max_length=100,default='',null=True,blank=True)
-    category= models.CharField(max_length=100,default='',null=True,blank=True)
+    date_start= models.DateTimeField(default=timezone.now, null=True, blank=True)
+    date_end= models.DateTimeField(default=timezone.now, null=True, blank=True)
+    category= models.CharField(max_length=100,choices=PLAN_TYPES,default='')
     def __str__(self):
         return self.name
     

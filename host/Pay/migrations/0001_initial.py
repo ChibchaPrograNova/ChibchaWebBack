@@ -25,15 +25,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Payment_Method',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(blank=True, default='', max_length=200, null=True)),
-                ('method', models.IntegerField(default=0)),
-                ('id_Client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Client.client')),
-            ],
-        ),
-        migrations.CreateModel(
             name='Pay',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),

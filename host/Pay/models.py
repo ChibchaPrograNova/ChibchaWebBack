@@ -6,27 +6,26 @@ from django.utils import timezone
 # Create your models here.
 class Card(models.Model):
     id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    name= models.CharField(max_length=200,default='',null=True,blank=True)
+    number= models.CharField(max_length=200,default='',null=True,blank=True)
     type= models.CharField(max_length=200,default='',null=True,blank=True)
-    h_entry= models.DateTimeField(default=timezone.now)
+    d_expiration= models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.name
+        return self.number
 
 class Pay(models.Model):
+    PAY_TYPES = [
+        ('Mensual', 'Mensual'),
+        ('Trimestral', 'Trimestral'),
+        ('Semestral', 'Semestral'),
+        ('Anual', 'Anual'),
+    ]
     id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
     id_Card = models.ForeignKey(Card, on_delete=models.CASCADE)
     name= models.CharField(max_length=200,default='',null=True,blank=True)
     amount= models.IntegerField(default=0)
+    type= models.CharField(max_length=200,choices=PAY_TYPES,default='')
     date= models.DateTimeField(default=timezone.now)
-
     def __str__(self):
         return self.name
     
-class Payment_Method(models.Model):
-    id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    type= models.CharField(max_length=200,default='',null=True,blank=True)
-    method= models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.name
