@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS= True
-CSFR_TRUSTED_ORIGINS = ['https://chibchawebback-production-0372.up.railway.app']
+CSFR_TRUSTED_ORIGINS = ['https://chibchawebback-production-e6e7.up.railway.app']
 
 # Application definition
 
