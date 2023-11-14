@@ -9,6 +9,8 @@ class Client(models.Model):
     mail= models.CharField(max_length=100,default='',null=True,blank=True)
     age= models.IntegerField(default=0)
     country= models.CharField(max_length=20,default='',null=True,blank=True)
+    plans = models.ManyToManyField('Plan', through='PlanClient', related_name='clients', blank=True)
+
     def __str__(self):
         return self.name
 
@@ -24,8 +26,8 @@ class Plan(models.Model):
     def __str__(self):
         return self.category
     
-class Plan_Client(models.Model):
-    id_Plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
+class PlanClient(models.Model):
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     def __str__(self):
-        return str(self.id_Plan) + " - " + str(self.id_Client)
+        return f"{self.plan} - {self.client}"

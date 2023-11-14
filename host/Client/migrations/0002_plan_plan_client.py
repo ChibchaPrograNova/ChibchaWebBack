@@ -21,12 +21,5 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(blank=True, default='', max_length=100, null=True)),
             ],
         ),
-        migrations.CreateModel(
-            name='Plan_Client',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('id_Client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Client.client')),
-                ('id_Plan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Client.plan')),
-            ],
-        ),
+        
     ]
