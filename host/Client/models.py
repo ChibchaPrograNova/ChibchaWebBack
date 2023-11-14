@@ -18,16 +18,14 @@ class Plan(models.Model):
         ('Platino', 'Platino'),
         ('Oro', 'Oro'),
     ]
-    name= models.CharField(max_length=200,default='',null=True,blank=True)
     date_start= models.DateTimeField(default=timezone.now, null=True, blank=True)
     date_end= models.DateTimeField(default=timezone.now, null=True, blank=True)
     category= models.CharField(max_length=100,choices=PLAN_TYPES,default='')
     def __str__(self):
-        return self.name
+        return self.category
     
 class Plan_Client(models.Model):
     id_Plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    
     def __str__(self):
         return str(self.id_Plan) + " - " + str(self.id_Client)
