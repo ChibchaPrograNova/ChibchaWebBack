@@ -26,10 +26,11 @@ SECRET_KEY = 'django-insecure-5jpfwsgcc+o3)z!h(yc92m)zbnig7xl$*bq87itf57*xavj1qi
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['chibchawebback-production-e6e7.up.railway.app']
 CORS_ALLOW_ALL_ORIGINS= True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = ["https://chibchawebback-production-e6e7.up.railway.app"]
 CSFR_TRUSTED_ORIGINS = ['https://chibchawebback-production-e6e7.up.railway.app']
-CORS_ALLOWED_ORIGINS = ["https://chibchawebback-production-e6e7.up.railway.app",]
 
 
 # Application definition
@@ -135,7 +136,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
