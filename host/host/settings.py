@@ -34,8 +34,6 @@ ALLOWED_HOSTS = ['chibchawebback-production-e6e7.up.railway.app']# settings.py
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = ["https://chibchawebback-production-e6e7.up.railway.app"]
 
-#CSFR_TRUSTED_ORIGINS = ['https://chibchawebback-production-e6e7.up.railway.app']
-
 
 # Application definition
 
