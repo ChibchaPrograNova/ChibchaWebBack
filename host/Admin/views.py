@@ -11,6 +11,14 @@ from rest_framework.parsers import JSONParser
 # Create your views here.
 def Executive_view(request, *args, **kwargs):
     if request.method == 'GET':
+        executive_mail = request.GET.get('mail')
+        if executive_mail:
+            try:
+                user = Executive.objects.get(mail=executive_mail)
+                serializer = Executive_Serializer(user)
+                return JsonResponse(serializer.data, safe=False)
+            except Executive.DoesNotExist:
+                return JsonResponse({'error': 'Administrador no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         Executives = Executive.objects.all()
         serializer=Executive_Serializer(Executives,many=True)
         return JsonResponse(serializer.data,safe=False)
