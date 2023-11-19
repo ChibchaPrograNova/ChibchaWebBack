@@ -7,10 +7,11 @@ class Client(models.Model):
     identification= models.CharField(max_length=200,default='',null=True,blank=True)
     address= models.CharField(max_length=100,default='',null=True,blank=True)
     mail= models.CharField(max_length=100,default='',null=True,blank=True)
+    password= models.CharField(max_length=200,default='',null=True,blank=True)
     age= models.IntegerField(default=0)
     country= models.CharField(max_length=20,default='',null=True,blank=True)
     plans = models.ManyToManyField('Plan', through='PlanClient', related_name='clients', blank=True)
-
+    activate= models.BooleanField(default=True)
     def __str__(self):
         return self.name
 

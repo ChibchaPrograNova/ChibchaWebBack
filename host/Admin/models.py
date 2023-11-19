@@ -20,6 +20,7 @@ class Distributor(models.Model):
     q_domains= models.IntegerField(default=0)
     category= models.CharField(max_length=20,choices=DISTRIBUTOR_CATEGORY,default='')
     bank_account= models.CharField(max_length=20,default='',null=True,blank=True)
+    activate= models.BooleanField(default=True)
     def __str__(self):
         return self.name
     
