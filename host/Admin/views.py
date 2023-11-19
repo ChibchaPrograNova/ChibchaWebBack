@@ -1,13 +1,27 @@
 from django.shortcuts import render
-from .models import Distributor, Domain
+from .models import Distributor, Domain,Executive
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
+from .serializers import Executive_Serializer
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 
 
 # Create your views here.
+def Executive_view(request, *args, **kwargs):
+    if request.method == 'GET':
+        Executives = Executive.objects.all()
+        serializer=Executive_Serializer(Executives,many=True)
+        return JsonResponse(serializer.data,safe=False)
+    if request.method == 'POST':
+        request_data=JSONParser().parse(request)
+        serializer=Executive_Serializer(data=request_data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data,status=status.HTTP_200_OK)
+        return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
 def Distributor_view(request, *args, **kwargs):
     if request.method == 'GET':
         user_id = request.GET.get('id')

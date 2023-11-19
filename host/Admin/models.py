@@ -1,6 +1,13 @@
 from django.db import models
 
 # Create your models here.
+
+class Executive(models.Model):
+    mail= models.CharField(max_length=200,default='',null=True,blank=True)
+    password= models.CharField(max_length=200,default='',null=True,blank=True)
+    def __str__(self):
+        return self.mail
+    
 class Distributor(models.Model):
     DISTRIBUTOR_CATEGORY = [
         ('Básico', 'Básico'),

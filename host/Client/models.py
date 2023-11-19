@@ -31,3 +31,4 @@ class PlanClient(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.plan} - {self.client}"
+        
