@@ -9,9 +9,17 @@ from rest_framework.parsers import JSONParser
 # Create your views here.
 def Distributor_view(request, *args, **kwargs):
     if request.method == 'GET':
-        users = Distributor.objects.all()
-        serializer=Distributor_Serializer(users,many=True)
-        return JsonResponse(serializer.data,safe=False)
+        user_id = request.GET.get('id')
+        if user_id:
+            try:
+                user = Client.objects.get(id=user_id)
+                serializer = Client_Serializer(user)
+                return JsonResponse(serializer.data, safe=False)
+            except Client.DoesNotExist:
+                return JsonResponse({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        users = Client.objects.all()
+        serializer = Client_Serializer(users, many=True)
+        return JsonResponse(serializer.data, safe=False)
     if request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Distributor_Serializer(data=request_data)
