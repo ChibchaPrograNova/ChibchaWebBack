@@ -22,13 +22,14 @@ def Executive_view(request, *args, **kwargs):
         Executives = Executive.objects.all()
         serializer=Executive_Serializer(Executives,many=True)
         return JsonResponse(serializer.data,safe=False)
-    if request.method == 'POST':
+    elif request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Executive_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
     
 def Distributor_view(request, *args, **kwargs):
     if request.method == 'GET':
@@ -51,14 +52,28 @@ def Distributor_view(request, *args, **kwargs):
         users = Distributor.objects.all()
         serializer = Distributor_Serializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
-
-    if request.method == 'POST':
+    elif request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Distributor_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'PUT':
+        user_id = request.GET.get('id')
+        if user_id:
+            try:
+                user = Distributor.objects.get(id=user_id)
+                request_data = JSONParser().parse(request)
+                serializer = Distributor_Serializer(user, data=request_data)
+
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            except Distributor.DoesNotExist:
+                return JsonResponse({'error': 'Distribuidor no encontrado'}, status=status.HTTP_404_NOT_FOUND)
     
 def Domain_view(request, *args, **kwargs):
     if request.method == 'GET':

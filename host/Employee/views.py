@@ -28,13 +28,29 @@ def Employee_view(request, *args, **kwargs):
         users = Employee.objects.all()
         serializer = Employee_Serializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
-    if request.method == 'POST':
+    elif request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Employee_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'PUT':
+        user_id = request.GET.get('id')
+        if user_id:
+            try:
+                user = Employee.objects.get(id=user_id)
+                request_data = JSONParser().parse(request)
+                serializer = Employee_Serializer(user, data=request_data)
+
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            except Employee.DoesNotExist:
+                return JsonResponse({'error': 'UEmpleado no encontrado'}, status=status.HTTP_404_NOT_FOUND)
     
 def Ticket_view(request, *args, **kwargs):
     if request.method == 'GET':
