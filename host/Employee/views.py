@@ -9,6 +9,14 @@ from rest_framework.parsers import JSONParser
 # Create your views here.
 def Employee_view(request, *args, **kwargs):
     if request.method == 'GET':
+        employee_id = request.GET.get('id')
+        if employee_id:
+            try:
+                employee = Employee.objects.get(id=user_id)
+                serializer = Client_Serializer(employee)
+                return JsonResponse(serializer.data, safe=False)
+            except Employee.DoesNotExist:
+                return JsonResponse({'error': 'Empleado no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         users = Employee.objects.all()
         serializer=Employee_Serializer(users,many=True)
         return JsonResponse(serializer.data,safe=False)
