@@ -18,9 +18,18 @@ def Distributor_view(request, *args, **kwargs):
                 return JsonResponse(serializer.data, safe=False)
             except Distributor.DoesNotExist:
                 return JsonResponse({'error': 'Distribuidor no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        user_mail = request.GET.get('mail')
+        if user_mail:
+            try:
+                user = Distributor.objects.get(mail=user_mail)
+                serializer = Distributor_Serializer(user)
+                return JsonResponse(serializer.data, safe=False)
+            except Distributor.DoesNotExist:
+                return JsonResponse({'error': 'Distribuidor no encontrado'}, status=status.HTTP_404_NOT_FOUND)        
         users = Distributor.objects.all()
         serializer = Distributor_Serializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
+
     if request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Distributor_Serializer(data=request_data)

@@ -17,6 +17,14 @@ def user_view(request, *args, **kwargs):
                 return JsonResponse(serializer.data, safe=False)
             except Client.DoesNotExist:
                 return JsonResponse({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        user_mail = request.GET.get('mail')
+        if user_mail:
+            try:
+                user = Client.objects.get(mail=user_mail)
+                serializer = Client_Serializer(user)
+                return JsonResponse(serializer.data, safe=False)
+            except Client.DoesNotExist:
+                return JsonResponse({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         users = Client.objects.all()
         serializer = Client_Serializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
