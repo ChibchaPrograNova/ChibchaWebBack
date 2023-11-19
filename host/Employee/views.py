@@ -12,8 +12,8 @@ def Employee_view(request, *args, **kwargs):
         employee_id = request.GET.get('id')
         if employee_id:
             try:
-                employee = Employee.objects.get(id=user_id)
-                serializer = Client_Serializer(employee)
+                employee = Employee.objects.get(id=employee_id)
+                serializer = Employee_Serializer(employee)
                 return JsonResponse(serializer.data, safe=False)
             except Employee.DoesNotExist:
                 return JsonResponse({'error': 'Empleado no encontrado'}, status=status.HTTP_404_NOT_FOUND)
