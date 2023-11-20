@@ -87,3 +87,39 @@ def Domain_view(request, *args, **kwargs):
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+def Process_view(request,*args, **kwargs):
+    if request.method == 'POST':
+        nombre = request.GET.get('nombre')
+
+        # Paso 1: Consultar todos los distribuidores
+        distribuidores_endpoint = '/Admins/Distributors/'
+        response_distribuidores = requests.get(distribuidores_endpoint)
+
+        if response_distribuidores.status_code != 200:
+            return JsonResponse({'error': 'Error al obtener los distribuidores'}, status=500)
+
+        distribuidores = response_distribuidores.json()
+
+        # Paso 2: Crear un array con las extensiones especificadas
+        extensiones = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
+
+        # Mezclar los dos arrays
+        distribuidores_extensiones = [(distribuidor, extension) for distribuidor in distribuidores for extension in extensiones]
+        random.shuffle(distribuidores_extensiones)
+
+        # Paso 3: Crear otro array con propiedades adicionales
+        resultado_final = []
+
+        for distribuidor, extension in distribuidores_extensiones:
+            resultado_final.append({
+                'nombre': nombre,
+                'distribuidor': distribuidor,
+                'extension': extension,
+                'disponibilidad': random.uniform(0, 1),
+                'plataforma': random.choice(['Unix', 'Windows']),
+            })
+
+        return JsonResponse({'resultados': resultado_final}, status=200)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
