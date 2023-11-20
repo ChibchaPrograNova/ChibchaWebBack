@@ -87,7 +87,7 @@ def Domain_view(request, *args, **kwargs):
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
+'''
 def Process_view(request,*args, **kwargs):
     if request.method == 'POST':
         nombre = request.GET.get('nombre')
@@ -123,3 +123,4 @@ def Process_view(request,*args, **kwargs):
         return JsonResponse({'resultados': resultado_final}, status=200)
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+'''
