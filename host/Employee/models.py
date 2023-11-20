@@ -7,6 +7,14 @@ OCCUPATION_TYPES = [
         ('Env', 'Env'),
         ('Privacidad', 'Privacidad'),
     ]
+
+LEVEL_TYPES = [
+    ('Basico', 'Basico'),
+    ('Intermedio', 'Intermedio'),
+    ('Critico', 'Critico'),
+    ('Prioritario', 'Prioritario')
+
+]
 class Employee(models.Model):
     name= models.CharField(max_length=200,default='',null=True,blank=True)
     identification= models.CharField(max_length=200,default='',null=True,blank=True)
@@ -24,7 +32,7 @@ class Employee(models.Model):
 class Ticket(models.Model):
     h_entry= models.DateTimeField(default=timezone.now)
     affair= models.CharField(max_length=100,default='',null=True,blank=True)
-    level= models.CharField(max_length=100,default='',null=True,blank=True)
+    level= models.CharField(max_length=100, choices=LEVEL_TYPES,null=True,blank=True)
     category= models.CharField(max_length=20,choices=OCCUPATION_TYPES,default='')
     description= models.TextField(default='',null=True,blank=True)
     def __str__(self):
