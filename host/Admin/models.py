@@ -33,6 +33,6 @@ class Domain(models.Model):
     id_Distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE)    
     available= models.BooleanField(default=True)
     plataform= models.CharField(max_length=100,choices=PLATAFORM_TYPE,default='')
-    description=models.CharField(max_length=200,default='',null=True,blank=True)
+    description = models.TextField(default='', null=True, blank=True)
     def __str__(self):
         return self.name

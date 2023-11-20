@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from Client.models import Client
 # Create your models here.
 OCCUPATION_TYPES = [
         ('Conectividad', 'Conectividad'),
@@ -31,6 +32,7 @@ class Employee(models.Model):
 
 class Ticket(models.Model):
     h_entry= models.DateTimeField(default=timezone.now)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE,default=None)
     affair= models.CharField(max_length=100,default='',null=True,blank=True)
     level= models.CharField(max_length=100, choices=LEVEL_TYPES,null=True,blank=True)
     category= models.CharField(max_length=20,choices=OCCUPATION_TYPES,default='')
