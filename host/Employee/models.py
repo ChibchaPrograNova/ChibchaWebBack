@@ -26,6 +26,6 @@ class Ticket(models.Model):
     affair= models.CharField(max_length=100,default='',null=True,blank=True)
     level= models.CharField(max_length=100,default='',null=True,blank=True)
     category= models.CharField(max_length=20,choices=OCCUPATION_TYPES,default='')
-    description= models.CharField(max_length=1000,default='',null=True,blank=True)
+    description= models.TextField(default='',null=True,blank=True)
     def __str__(self):
         return self.affair
