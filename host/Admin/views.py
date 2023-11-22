@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render
 from .models import Distributor, Domain,Executive
 from .serializers import Distributor_Serializer
@@ -87,40 +88,53 @@ def Domain_view(request, *args, **kwargs):
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-'''
-def Process_view(request,*args, **kwargs):
+
+def Process_view(request, ):
     if request.method == 'POST':
-        nombre = request.GET.get('nombre')
+        # Paso 1: Recibir el nombre del dominio desde la solicitud
+        domain_name = request.POST.get('domain_name')
 
-        # Paso 1: Consultar todos los distribuidores
-        distribuidores_endpoint = '/Admins/Distributors/'
-        response_distribuidores = requests.get(distribuidores_endpoint)
+        if not domain_name:
+            return JsonResponse({'error': 'Se requiere el nombre del dominio'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if response_distribuidores.status_code != 200:
-            return JsonResponse({'error': 'Error al obtener los distribuidores'}, status=500)
+        # Paso 2: Consultar todos los distribuidores
+        distributors = Distributor.objects.all()
 
-        distribuidores = response_distribuidores.json()
+        if not distributors.exists():
+            return JsonResponse({'error': 'No hay distribuidores disponibles'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Paso 2: Crear un array con las extensiones especificadas
-        extensiones = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
+        # Paso 3: Asociar aleatoriamente el dominio a un distribuidor
+        selected_distributor = random.choice(distributors)
 
-        # Mezclar los dos arrays
-        distribuidores_extensiones = [(distribuidor, extension) for distribuidor in distribuidores for extension in extensiones]
-        random.shuffle(distribuidores_extensiones)
+        # Paso 4: Crear un array con propiedades adicionales para el dominio
+        additional_properties = {
+            'property1': 'value1',
+            'property2': 'value2',
+            # Agrega más propiedades según sea necesario
+        }
 
-        # Paso 3: Crear otro array con propiedades adicionales
-        resultado_final = []
+        # Paso 5: Agregar extensiones al nombre del dominio y guardar en la base de datos
+        extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
+        created_domains = []
 
-        for distribuidor, extension in distribuidores_extensiones:
-            resultado_final.append({
-                'nombre': nombre,
-                'distribuidor': distribuidor,
-                'extension': extension,
-                'disponibilidad': random.uniform(0, 1),
-                'plataforma': random.choice(['Unix', 'Windows']),
-            })
+        for extension in extensions:
+            domain_with_extension = domain_name + extension
 
-        return JsonResponse({'resultados': resultado_final}, status=200)
+            # Paso 6: Guardar el dominio en la base de datos
+            domain_data = {
+                'name': domain_with_extension,
+                'id_Distributor': selected_distributor.id,
+                'available': True,  # Puedes ajustar esto según tus necesidades
+                'plataform': 'Windows',  # Puedes ajustar esto según tus necesidades
+                'description': 'Descripción del dominio',  # Puedes ajustar esto según tus necesidades
+                **additional_properties,  # Agrega propiedades adicionales
+            }
 
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
-'''
+            serializer = Domain_Serializer(data=domain_data)
+            if serializer.is_valid():
+                serializer.save()
+                created_domains.append(serializer.data)
+
+        return JsonResponse(created_domains, status=status.HTTP_200_OK, safe=False)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
