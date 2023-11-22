@@ -89,45 +89,36 @@ def Domain_view(request, *args, **kwargs):
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-def Process_view(request, ):
+def Process_view(request):
     if request.method == 'POST':
-        # Paso 1: Recibir el nombre del dominio desde la solicitud
+        
         domain_name = request.POST.get('domain_name')
 
         if not domain_name:
             return JsonResponse({'error': 'Se requiere el nombre del dominio'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Paso 2: Consultar todos los distribuidores
+        
         distributors = Distributor.objects.all()
 
         if not distributors.exists():
             return JsonResponse({'error': 'No hay distribuidores disponibles'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Paso 3: Asociar aleatoriamente el dominio a un distribuidor
+        
         selected_distributor = random.choice(distributors)
 
-        # Paso 4: Crear un array con propiedades adicionales para el dominio
-        additional_properties = {
-            'property1': 'value1',
-            'property2': 'value2',
-            # Agrega más propiedades según sea necesario
-        }
-
-        # Paso 5: Agregar extensiones al nombre del dominio y guardar en la base de datos
         extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
         created_domains = []
 
         for extension in extensions:
             domain_with_extension = domain_name + extension
 
-            # Paso 6: Guardar el dominio en la base de datos
             domain_data = {
                 'name': domain_with_extension,
                 'id_Distributor': selected_distributor.id,
-                'available': True,  # Puedes ajustar esto según tus necesidades
-                'plataform': 'Windows',  # Puedes ajustar esto según tus necesidades
-                'description': 'Descripción del dominio',  # Puedes ajustar esto según tus necesidades
-                **additional_properties,  # Agrega propiedades adicionales
+                'available': random.choice([True, False]),
+                'plataform': random.choice(['Unix', 'Windows']),
+                'description': 'Descripción del dominio',  
+                
             }
 
             serializer = Domain_Serializer(data=domain_data)
