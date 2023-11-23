@@ -1,5 +1,6 @@
 import random
 from django.shortcuts import render
+import json
 from .models import Distributor, Domain,Executive
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
@@ -91,19 +92,21 @@ def Domain_view(request, *args, **kwargs):
 
 def Process_view(request):
     if request.method == 'POST':
-        
-        domain_name = request.POST.get('domain_name')
+        try:
+            # Intenta cargar los datos JSON desde el cuerpo de la solicitud
+            data = json.loads(request.body)
+            domain_name = data.get('domain_name')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al decodificar JSON'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not domain_name:
             return JsonResponse({'error': 'Se requiere el nombre del dominio'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
         distributors = Distributor.objects.all()
 
         if not distributors.exists():
             return JsonResponse({'error': 'No hay distribuidores disponibles'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
         selected_distributor = random.choice(distributors)
 
         extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
@@ -117,8 +120,7 @@ def Process_view(request):
                 'id_Distributor': selected_distributor.id,
                 'available': random.choice([True, False]),
                 'plataform': random.choice(['Unix', 'Windows']),
-                'description': 'Descripción del dominio',  
-                
+                'description': 'Descripción del dominio',
             }
 
             serializer = Domain_Serializer(data=domain_data)
