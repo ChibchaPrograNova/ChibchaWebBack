@@ -83,7 +83,7 @@ def Domain_view(request, *args, **kwargs):
         if domain_name:
             try:
                 domain = Domain.objects.filter(name__icontains=domain_name)
-                serializer = Distributor_Serializer(domain)
+                serializer = Domain_Serializer(domain)
                 return JsonResponse(serializer.data, safe=False)
             except Domain.DoesNotExist:
                 return JsonResponse({'error': 'Dominio no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
