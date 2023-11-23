@@ -114,8 +114,6 @@ def Process_view(request):
         for extension in extensions:
             # Seleccionamos un distribuidor aleatorio y lo eliminamos de la lista
             selected_distributor = random.choice(distributors)
-           # distributors.remove(selected_distributor)
-
             domain_with_extension = domain_name + extension
 
             domain_data = {
