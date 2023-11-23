@@ -30,10 +30,10 @@ class Domain(models.Model):
         ('Windows', 'Windows'),
         ('Unix', 'Unix'),
     ]
-    id_Client = models.ForeignKey(Client, on_delete=models.CASCADE,null=True,blank=True)
-    id_Plan = models.ForeignKey(Plan, on_delete=models.CASCADE,null=True,blank=True)
+    id_Client_id = models.ForeignKey(Client, on_delete=models.CASCADE,null=True,blank=True)
+    id_Plan_id = models.ForeignKey(Plan, on_delete=models.CASCADE,null=True,blank=True)
     name= models.CharField(max_length=200,default='',null=True,blank=True)
-    id_Distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE)    
+    id_Distributor_id = models.ForeignKey(Distributor, on_delete=models.CASCADE)    
     available= models.BooleanField(default=True)
     plataform= models.CharField(max_length=100,choices=PLATAFORM_TYPE,default='')
     description = models.TextField(default='', null=True, blank=True)
