@@ -101,20 +101,17 @@ def Process_view(request):
         if not domain_name:
             return JsonResponse({'error': 'Se requiere el nombre del dominio'}, status=status.HTTP_400_BAD_REQUEST)
 
-        distributors = list(Distributor.objects.all())  # Convertimos a lista para poder modificarla
+        distributors = Distributor.objects.all()
 
-        if not distributors:
+        if not distributors.exists():
             return JsonResponse({'error': 'No hay distribuidores disponibles'}, status=status.HTTP_400_BAD_REQUEST)
 
-        created_domains = []
+        selected_distributor = random.choice(distributors)
 
         extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
+        created_domains = []
 
         for extension in extensions:
-            # Seleccionamos un distribuidor aleatorio y lo eliminamos de la lista
-            selected_distributor = random.choice(distributors)
-            distributors.remove(selected_distributor)
-
             domain_with_extension = domain_name + extension
 
             domain_data = {
