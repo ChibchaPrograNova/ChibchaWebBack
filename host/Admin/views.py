@@ -91,6 +91,7 @@ def Domain_view(request, *args, **kwargs):
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 def Process_view(request):
+    #no creo que sea por esto 
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
