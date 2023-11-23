@@ -79,9 +79,17 @@ def Distributor_view(request, *args, **kwargs):
     
 def Domain_view(request, *args, **kwargs):
     if request.method == 'GET':
+        domain_name = request.GET.get('name')
+        if domain_name:
+            try:
+                domain = Domain.objects.filter(name__icontains=domain_name)
+                serializer = Distributor_Serializer(domain)
+                return JsonResponse(serializer.data, safe=False)
+            except Domain.DoesNotExist:
+                return JsonResponse({'error': 'Dominio no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
         Domains = Domain.objects.all()
-        serializer=Domain_Serializer(Domains,many=True)
-        return JsonResponse(serializer.data,safe=False)
+        serializer = Domain_Serializer(Domains, many=True)
+        return JsonResponse(serializer.data, safe=False)
     if request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Domain_Serializer(data=request_data)
