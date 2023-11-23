@@ -1,4 +1,5 @@
 from django.db import models
+from Client.models import Client,Plan
 
 # Create your models here.
 
@@ -29,6 +30,8 @@ class Domain(models.Model):
         ('Windows', 'Windows'),
         ('Unix', 'Unix'),
     ]
+    id_Client = models.ForeignKey(Client, on_delete=models.CASCADE,null=True,blank=True)
+    id_Plan = models.ForeignKey(Plan, on_delete=models.CASCADE,null=True,blank=True)
     name= models.CharField(max_length=200,default='',null=True,blank=True)
     id_Distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE)    
     available= models.BooleanField(default=True)

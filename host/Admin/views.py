@@ -93,7 +93,6 @@ def Domain_view(request, *args, **kwargs):
 def Process_view(request):
     if request.method == 'POST':
         try:
-            # Intenta cargar los datos JSON desde el cuerpo de la solicitud
             data = json.loads(request.body)
             domain_name = data.get('domain_name')
         except json.JSONDecodeError:
@@ -102,17 +101,20 @@ def Process_view(request):
         if not domain_name:
             return JsonResponse({'error': 'Se requiere el nombre del dominio'}, status=status.HTTP_400_BAD_REQUEST)
 
-        distributors = Distributor.objects.all()
+        distributors = list(Distributor.objects.all())  # Convertimos a lista para poder modificarla
 
-        if not distributors.exists():
+        if not distributors:
             return JsonResponse({'error': 'No hay distribuidores disponibles'}, status=status.HTTP_400_BAD_REQUEST)
 
-        selected_distributor = random.choice(distributors)
-
-        extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
         created_domains = []
 
+        extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
+
         for extension in extensions:
+            # Seleccionamos un distribuidor aleatorio y lo eliminamos de la lista
+            selected_distributor = random.choice(distributors)
+            distributors.remove(selected_distributor)
+
             domain_with_extension = domain_name + extension
 
             domain_data = {
