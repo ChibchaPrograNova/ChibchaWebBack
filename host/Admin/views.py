@@ -82,7 +82,7 @@ def Domain_view(request, *args, **kwargs):
         domain_name = request.GET.get('name')
         if domain_name:
             try:
-                domain = Domain.objects.get(name__icontains=domain_name)
+                domain = Domain.objects.filter(name__icontains=domain_name).values()
                 serializer = Domain_Serializer(domain,many=True)
                 return JsonResponse(serializer.data, safe=False)
             except Domain.DoesNotExist:
