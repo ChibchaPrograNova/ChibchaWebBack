@@ -90,26 +90,14 @@ def Domain_view(request, *args, **kwargs):
         Domains = Domain.objects.all()
         serializer = Domain_Serializer(Domains, many=True)
         return JsonResponse(serializer.data, safe=False)
-    elif request.method == 'GET':
-        idClient = request.GET.get('idClient')
-        if idClient:
-            try:
-                domain = Domain.objects.get(id_Client=idClient)
-                serializer = Domain_Serializer(domain,many=True)
-                return JsonResponse(serializer.data, safe=False)
-            except Domain.DoesNotExist:
-                return JsonResponse({'error': 'Dominios no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
-        Domains = Domain.objects.all()
-        serializer = Domain_Serializer(Domains, many=True)
-        return JsonResponse(serializer.data, safe=False)    
-    elif request.method == 'POST':
+    if request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Domain_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         domain_id = request.GET.get('id')
         if domain_id:
             try:
@@ -149,7 +137,6 @@ def Process_view(request):
         extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
 
         for extension in extensions:
-            # Seleccionamos un distribuidor aleatorio y lo eliminamos de la lista
             selected_distributor = random.choice(distributors)
             domain_with_extension = domain_name + extension
 
@@ -169,3 +156,17 @@ def Process_view(request):
         return JsonResponse(created_domains, status=status.HTTP_200_OK, safe=False)
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def search_Plan(request,*args, **kwargs):
+    if request.method == 'GET':
+        idClient = request.GET.get('idClient')
+        if idClient:
+            try:
+                domain = Domain.objects.get(id_Client=idClient)
+                serializer = Domain_Serializer(domain,many=True)
+                return JsonResponse(serializer.data, safe=False)
+            except Domain.DoesNotExist:
+                return JsonResponse({'error': 'Dominios no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
+        Domains = Domain.objects.all()
+        serializer = Domain_Serializer(Domains, many=True)
+        return JsonResponse(serializer.data, safe=False)
