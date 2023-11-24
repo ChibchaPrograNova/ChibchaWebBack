@@ -94,7 +94,7 @@ def Domain_view(request, *args, **kwargs):
         id_cliente = request.GET.get('id_client')
         if id_cliente:
             try:
-                domain = Domain.objects.filter(id_Client=id_cliente)
+                domain = Domain.objects.filter(id_Client_id=id_cliente)
                 serializer = Domain_Serializer(domain,many=True)
                 return JsonResponse(serializer.data, safe=False)
             except Domain.DoesNotExist:
