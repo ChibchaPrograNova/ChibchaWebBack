@@ -4,7 +4,7 @@ import json
 
 from  Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
-from Client.models import Plan
+from Client.models import Plan,Client
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
 from .serializers import Executive_Serializer
@@ -185,14 +185,13 @@ def search_Domain(request, *args, **kwargs):
 
 def search_Plan(request, *args, **kwargs):
     if request.method == 'GET':
-        idClient = request.GET.get('idClient')
-
-        if idClient:
+        idPlan = request.GET.get('idClient')
+        if idPlan:
             try:
-                plans = Plan.objects.filter(id_Client=idClient)
+                plans = Plan.objects.filter(id_Plan=idPlan)
                 
                 if plans.exists():
-                    serializer = Plan_Serializer(plans, many=True)
+                    serializer = Plan_Serializer(plans)
                     return JsonResponse(serializer.data, safe=False)
                 else:
                     return JsonResponse({'error': 'No se encontraron planes para el cliente dado'}, status=status.HTTP_404_NOT_FOUND)
