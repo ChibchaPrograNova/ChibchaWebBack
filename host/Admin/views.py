@@ -1,7 +1,10 @@
 import random
 from django.shortcuts import render
 import json
+
+from host.Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
+from Client.models import Plan
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
 from .serializers import Executive_Serializer
@@ -157,7 +160,7 @@ def Process_view(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-def search_Plan(request, *args, **kwargs):
+def search_Domain(request, *args, **kwargs):
     if request.method == 'GET':
         idClient = request.GET.get('idClient')
 
@@ -178,4 +181,27 @@ def search_Plan(request, *args, **kwargs):
             # No se proporcionó un idClient, devolver todos los dominios
             domains = Domain.objects.all()
             serializer = Domain_Serializer(domains, many=True)
+            return JsonResponse(serializer.data, safe=False)
+
+def search_Plan(request, *args, **kwargs):
+    if request.method == 'GET':
+        idClient = request.GET.get('idClient')
+
+        if idClient:
+            try:
+                plans = Plan.objects.filter(id_Client=idClient)
+                
+                if plans.exists():
+                    serializer = Plan_Serializer(plans, many=True)
+                    return JsonResponse(serializer.data, safe=False)
+                else:
+                    return JsonResponse({'error': 'No se encontraron planes para el cliente dado'}, status=status.HTTP_404_NOT_FOUND)
+
+            except Plan.DoesNotExist:
+                return JsonResponse({'error': 'Error al buscar planes'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            # No se proporcionó un idClient, devolver todos los planes
+            plans = Plan.objects.all()
+            serializer = Plan_Serializer(plans, many=True)
             return JsonResponse(serializer.data, safe=False)

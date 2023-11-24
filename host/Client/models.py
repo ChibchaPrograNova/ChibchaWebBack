@@ -24,6 +24,7 @@ class Plan(models.Model):
     date_start= models.DateTimeField(default=timezone.now, null=True, blank=True)
     date_end= models.DateTimeField(default=timezone.now, null=True, blank=True)
     category= models.CharField(max_length=100,choices=PLAN_TYPES,default='')
+    price= models.IntegerField(default=0)
     def __str__(self):
         return self.category
     
