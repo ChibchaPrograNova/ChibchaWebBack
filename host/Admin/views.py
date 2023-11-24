@@ -188,7 +188,7 @@ def search_Plan(request, *args, **kwargs):
         idPlan = request.GET.get('idPlan')
         if idPlan:
             try:
-                plans = Plan.objects.filter(id_Plan=idPlan)
+                plans = Plan.objects.filter(id=idPlan)
                 
                 if plans.exists():
                     serializer = Plan_Serializer(plans)
