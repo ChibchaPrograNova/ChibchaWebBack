@@ -2,7 +2,7 @@ import random
 from django.shortcuts import render
 import json
 
-from host.Client.serializers import Plan_Serializer
+from  Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
 from Client.models import Plan
 from .serializers import Distributor_Serializer
