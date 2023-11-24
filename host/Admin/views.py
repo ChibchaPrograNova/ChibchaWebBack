@@ -188,19 +188,20 @@ def search_Plan(request, *args, **kwargs):
         idPlan = request.GET.get('idPlan')
         if idPlan:
             try:
+                # Utiliza filter(id=idPlan) directamente para buscar por el id exacto
                 plans = Plan.objects.filter(id=idPlan)
-                
+
                 if plans.exists():
-                    serializer = Plan_Serializer(plans)
+                    serializer = Plan_Serializer(plans, many=True)
                     return JsonResponse(serializer.data, safe=False)
                 else:
-                    return JsonResponse({'error': 'No se encontraron planes para el cliente dado'}, status=status.HTTP_404_NOT_FOUND)
+                    return JsonResponse({'error': 'No se encontraron planes para el plan dado'}, status=status.HTTP_404_NOT_FOUND)
 
             except Plan.DoesNotExist:
                 return JsonResponse({'error': 'Error al buscar planes'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         else:
-            # No se proporcionó un idClient, devolver todos los planes
+            # No se proporcionó un idPlan, devolver todos los planes
             plans = Plan.objects.all()
             serializer = Plan_Serializer(plans, many=True)
             return JsonResponse(serializer.data, safe=False)
