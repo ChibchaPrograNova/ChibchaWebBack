@@ -185,7 +185,7 @@ def search_Domain(request, *args, **kwargs):
 
 def search_Plan(request, *args, **kwargs):
     if request.method == 'GET':
-        idPlan = request.GET.get('idClient')
+        idPlan = request.GET.get('idPlan')
         if idPlan:
             try:
                 plans = Plan.objects.filter(id_Plan=idPlan)
