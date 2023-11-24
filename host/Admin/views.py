@@ -92,7 +92,7 @@ def Domain_view(request, *args, **kwargs):
         return JsonResponse(serializer.data, safe=False)
     elif request.method == 'GET':
         idClient = request.GET.get('idClient')
-        if id_cliente:
+        if idClient:
             try:
                 domain = Domain.objects.get(id_Client=idClient)
                 serializer = Domain_Serializer(domain,many=True)
