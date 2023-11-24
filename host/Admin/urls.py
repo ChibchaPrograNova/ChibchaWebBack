@@ -8,4 +8,4 @@ urlpatterns=[path('Distributors/', csrf_exempt(Distributor_view)),
              path('Executive/',csrf_exempt(Executive_view)),
              path('Process/',csrf_exempt(Process_view)),
              path('Search/',csrf_exempt(search_Domain)),
-             path('Search/',csrf_exempt(search_Plan)),]
+             path('SearchP/',csrf_exempt(search_Plan)),]
