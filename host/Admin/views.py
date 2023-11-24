@@ -157,16 +157,25 @@ def Process_view(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-def search_Plan(request,*args, **kwargs):
+def search_Plan(request, *args, **kwargs):
     if request.method == 'GET':
         idClient = request.GET.get('idClient')
+
         if idClient:
             try:
-                domain = Domain.objects.get(id_Client=idClient)
-                serializer = Domain_Serializer(domain,many=True)
-                return JsonResponse(serializer.data, safe=False)
+                domains = Domain.objects.filter(id_Client=idClient)
+                
+                if domains.exists():
+                    serializer = Domain_Serializer(domains, many=True)
+                    return JsonResponse(serializer.data, safe=False)
+                else:
+                    return JsonResponse({'error': 'No se encontraron dominios para el cliente dado'}, status=status.HTTP_404_NOT_FOUND)
+
             except Domain.DoesNotExist:
-                return JsonResponse({'error': 'Dominios no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
-        Domains = Domain.objects.all()
-        serializer = Domain_Serializer(Domains, many=True)
-        return JsonResponse(serializer.data, safe=False)
+                return JsonResponse({'error': 'Error al buscar dominios'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            # No se proporcionó un idClient, devolver todos los dominios
+            domains = Domain.objects.all()
+            serializer = Domain_Serializer(domains, many=True)
+            return JsonResponse(serializer.data, safe=False)
