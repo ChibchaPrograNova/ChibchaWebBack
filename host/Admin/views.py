@@ -2,7 +2,7 @@ import random
 from django.shortcuts import render
 import json
 from django.http import HttpResponse
-import datetime
+from datetime import datetime
 from xml.etree import ElementTree as ET
 import traceback
 from  Client.serializers import Plan_Serializer
