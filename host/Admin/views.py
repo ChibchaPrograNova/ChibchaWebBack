@@ -214,22 +214,19 @@ def distributor_data_for_xml(request, *args, **kwargs):
         try:
             # Paso 1: Traer todos los distribuidores asignados
             distributors = Distributor.objects.all()
-            
+
             # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
-            current_month = datetime.datetime.now().month
-            
-            # Utilizar planclient_set para acceder a los planes a través de la relación inversa
-            plan_clients = PlanClient.objects.filter(client__in=distributors.values_list('id'))
-            
+            current_month = datetime.now().month
+
             # Utilizar id_Plan en lugar de plan__id
-            plan_ids = plan_clients.values_list('id_Plan__id', flat=True)
-            
+            plan_ids = Domain.objects.filter(id_Distributor__in=distributors.values_list('id')).values_list('id_Plan__id', flat=True)
+
             # Utilizar created_at en lugar de date_created
             domains_in_month = Domain.objects.filter(id_Plan__id__in=plan_ids, created_at__month=current_month)
-            
+
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
-            
+
             # Devolver el XML como respuesta
             response = HttpResponse(xml_content, content_type='application/xml')
             response['Content-Disposition'] = 'attachment; filename="data.xml"'
@@ -248,7 +245,7 @@ def build_xml_from_data(distributors, domains):
         for distributor in distributors:
             distributor_element = ET.SubElement(root, 'distributor', name=distributor.name, id=str(distributor.id))
             
-            for domain in domains.filter(plan__planclient__client=distributor.clients.first()):
+            for domain in domains.filter(id_Distributor=distributor.id):
                 domain_element = ET.SubElement(distributor_element, 'domain', name=domain.name, id=str(domain.id))
     
         xml_content = ET.tostring(root, encoding='utf-8').decode('utf-8')

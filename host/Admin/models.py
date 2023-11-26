@@ -38,7 +38,6 @@ class Domain(models.Model):
     available= models.BooleanField(default=True)
     plataform= models.CharField(max_length=100,choices=PLATAFORM_TYPE,default='')
     description = models.TextField(default='', null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)  # Corregir esta línea
 
     def __str__(self):
         return self.name
