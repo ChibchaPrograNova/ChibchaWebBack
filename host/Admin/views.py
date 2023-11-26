@@ -7,7 +7,7 @@ from xml.etree import ElementTree as ET
 import traceback
 from  Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
-from Client.models import Plan
+from Client.models import Plan, PlanClient
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
 from .serializers import Executive_Serializer
@@ -217,9 +217,9 @@ def distributor_data_for_xml(request, *args, **kwargs):
             
             # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
             current_month = datetime.datetime.now().month
-            plan_clients = Plan.objects.filter(plan__in=distributors.values_list('plans__id'))
+            plan_clients = PlanClient.objects.filter(plan__in=distributors.values_list('plans__id'))
             client_ids = plan_clients.values_list('client__id', flat=True)
-            domains_in_month = Domain.objects.filter(plan__planclient__client__in=client_ids, date_created__month=current_month)
+            domains_in_month = Domain.objects.filter(plan__planclient__client__id__in=client_ids, date_created__month=current_month)
             
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
@@ -234,7 +234,6 @@ def distributor_data_for_xml(request, *args, **kwargs):
             return HttpResponseServerError(f"Error: {e}")
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
 def build_xml_from_data(distributors, domains):
     try:
         root = ET.Element('data')
