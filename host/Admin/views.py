@@ -3,14 +3,15 @@ from django.shortcuts import render
 import json
 from django.http import HttpResponse
 import datetime
-
+from xml.etree import ElementTree as ET
+import traceback
 from  Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
 from Client.models import Plan
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
 from .serializers import Executive_Serializer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 
@@ -210,38 +211,45 @@ def search_Plan(request, *args, **kwargs):
 
 def distributor_data_for_xml(request, *args, **kwargs):
     if request.method == 'GET':
-        # Paso 1: Traer todos los distribuidores asignados
-        distributors = Distributor.objects.all()
-        
-        # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
-        current_month = datetime.datetime.now().month
-        domains_in_month = Domain.objects.filter(
-            plan__planclient__client__in=distributors.values_list('clients__id'),
-            date_created__month=current_month
-        )
-        
-        # Paso 3: Armar un XML con eso
-        xml_content = build_xml_from_data(distributors, domains_in_month)
-        
-        # Devolver el XML como respuesta
-        response = HttpResponse(xml_content, content_type='application/xml')
-        response['Content-Disposition'] = 'attachment; filename="data.xml"'
-        return response
+        try:
+            # Paso 1: Traer todos los distribuidores asignados
+            distributors = Distributor.objects.all()
+            
+            # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
+            current_month = datetime.datetime.now().month
+            domains_in_month = Domain.objects.filter(
+                plan__planclient__client__in=distributors.values_list('clients__id'),
+                date_created__month=current_month
+            )
+            
+            # Paso 3: Armar un XML con eso
+            xml_content = build_xml_from_data(distributors, domains_in_month)
+            
+            # Devolver el XML como respuesta
+            response = HttpResponse(xml_content, content_type='application/xml')
+            response['Content-Disposition'] = 'attachment; filename="data.xml"'
+            return response
+
+        except Exception as e:
+            traceback.print_exc()
+            return HttpResponseServerError(f"Error: {e}")
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 def build_xml_from_data(distributors, domains):
-    # Utiliza el módulo xml.etree.ElementTree para construir el XML
-    from xml.etree import ElementTree as ET
-    
-    root = ET.Element('data')
-    
-    for distributor in distributors:
-        distributor_element = ET.SubElement(root, 'distributor', name=distributor.name, id=str(distributor.id))
+    try:
+        root = ET.Element('data')
         
-        for domain in domains.filter(plan__planclient__client=distributor.clients.first()):
-            domain_element = ET.SubElement(distributor_element, 'domain', name=domain.name, id=str(domain.id))
+        for distributor in distributors:
+            distributor_element = ET.SubElement(root, 'distributor', name=distributor.name, id=str(distributor.id))
+            
+            for domain in domains.filter(plan__planclient__client=distributor.clients.first()):
+                domain_element = ET.SubElement(distributor_element, 'domain', name=domain.name, id=str(domain.id))
     
-    xml_content = ET.tostring(root, encoding='utf-8').decode('utf-8')
-    
-    return xml_content
+        xml_content = ET.tostring(root, encoding='utf-8').decode('utf-8')
+        
+        return xml_content
+
+    except Exception as e:
+        traceback.print_exc()
+        return ""
