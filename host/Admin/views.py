@@ -217,9 +217,13 @@ def distributor_data_for_xml(request, *args, **kwargs):
             
             # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
             current_month = datetime.datetime.now().month
-            plan_clients = PlanClient.objects.filter(plan__in=distributors.values_list('plans__id'))
-            client_ids = plan_clients.values_list('client__id', flat=True)
-            domains_in_month = Domain.objects.filter(plan__planclient__client__id__in=client_ids, date_created__month=current_month)
+            
+            # Utilizar planclient_set para acceder a los planes a través de la relación inversa
+            plan_clients = PlanClient.objects.filter(client__in=distributors.values_list('id'))
+            plan_ids = plan_clients.values_list('plan__id', flat=True)
+            
+            # Utilizar plan__id en lugar de plans__id
+            domains_in_month = Domain.objects.filter(plan__id__in=plan_ids, date_created__month=current_month)
             
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
@@ -234,6 +238,7 @@ def distributor_data_for_xml(request, *args, **kwargs):
             return HttpResponseServerError(f"Error: {e}")
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 def build_xml_from_data(distributors, domains):
     try:
         root = ET.Element('data')
