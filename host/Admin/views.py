@@ -220,10 +220,12 @@ def distributor_data_for_xml(request, *args, **kwargs):
             
             # Utilizar planclient_set para acceder a los planes a través de la relación inversa
             plan_clients = PlanClient.objects.filter(client__in=distributors.values_list('id'))
-            plan_ids = plan_clients.values_list('plan__id', flat=True)
             
-            # Utilizar plan__id en lugar de plans__id
-            domains_in_month = Domain.objects.filter(plan__id__in=plan_ids, created_at__month=current_month)
+            # Utilizar id_Plan en lugar de plan__id
+            plan_ids = plan_clients.values_list('id_Plan__id', flat=True)
+            
+            # Utilizar created_at en lugar de date_created
+            domains_in_month = Domain.objects.filter(id_Plan__id__in=plan_ids, created_at__month=current_month)
             
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
