@@ -223,7 +223,7 @@ def distributor_data_for_xml(request, *args, **kwargs):
             plan_ids = plan_clients.values_list('plan__id', flat=True)
             
             # Utilizar plan__id en lugar de plans__id
-            domains_in_month = Domain.objects.filter(plan__id__in=plan_ids, date_created__month=current_month)
+            domains_in_month = Domain.objects.filter(plan__id__in=plan_ids, created_at__month=current_month)
             
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
