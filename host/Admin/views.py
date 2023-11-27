@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings
 import io
 
@@ -264,7 +264,7 @@ def xml_report(request):
 
     #     return response
     if request.method == 'GET':
-    # Paso 1: Traer todos los distribuidores asignados
+        # Paso 1: Traer todos los distribuidores asignados
         distributors = Distributor.objects.all()
 
         # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
@@ -300,12 +300,13 @@ def xml_report(request):
             xml_string = xml_files.get(xml_filename, '')
 
             if xml_string:
-                send_mail(
+                email = EmailMessage(
                     subject='Informe Mensual',
-                    message='Adjunto encontrarás el informe mensual en formato XML.',
+                    body='Adjunto encontrarás el informe mensual en formato XML.',
                     from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[distributor.mail],  # Asegúrate de tener un campo 'email' en tu modelo Distributor
-                    attachments=[(xml_filename, xml_string, 'application/xml')],
+                    to=[distributor.mail], 
                 )
+                email.attach(xml_filename, xml_string, 'application/xml')
+                email.send()
 
         return HttpResponse("Correo(s) enviado(s) con éxito.")
