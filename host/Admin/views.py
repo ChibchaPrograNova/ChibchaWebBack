@@ -304,7 +304,7 @@ def xml_report(request):
                     subject='Informe Mensual',
                     message='Adjunto encontrarás el informe mensual en formato XML.',
                     from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[distributor.email],  # Asegúrate de tener un campo 'email' en tu modelo Distributor
+                    recipient_list=[distributor.mail],  # Asegúrate de tener un campo 'email' en tu modelo Distributor
                     attachments=[(xml_filename, xml_string, 'application/xml')],
                 )
 
