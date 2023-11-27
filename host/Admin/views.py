@@ -15,6 +15,8 @@ from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime, timedelta
+
 
 
 # Create your views here.
@@ -216,20 +218,29 @@ def xml_report(request):
         # Paso 1: Traer todos los distribuidores asignados
         distributors = Distributor.objects.all()
 
-        # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
-        current_month = timezone.now().month
+        # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+
         domains_in_month = Domain.objects.filter(
             id_Distributor__in=distributors,
-            created_at__month=current_month
+            created_at__month=current_month,
+            created_at__year=current_year
         )
 
         # Paso 3: Armar un XML con eso
         xml_root = ET.Element("report")
-        
+
         for distributor in distributors:
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
-            ET.SubElement(distributor_element, "total_domains").text = str(domains_in_month.filter(id_Distributor=distributor).count())
+
+            # Agregar los dominios de este distribuidor al XML
+            distributor_domains = domains_in_month.filter(id_Distributor=distributor)
+            for domain in distributor_domains:
+                domain_element = ET.SubElement(distributor_element, "domain")
+                ET.SubElement(domain_element, "name").text = domain.name
+                ET.SubElement(domain_element, "plataform").text = domain.plataform
 
         # Convertir el árbol XML a una cadena y devolverlo como respuesta
         xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
