@@ -218,11 +218,9 @@ def distributor_data_for_xml(request, *args, **kwargs):
             # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
             current_month = datetime.now().month
 
-            # Utilizar id_Plan en lugar de plan__id
-            plan_ids = Domain.objects.filter(id_Distributor__in=distributors.values_list('id')).values_list('id_Plan__id', flat=True)
-
-            # Utilizar created_at en lugar de date_created
-            domains_in_month = Domain.objects.filter(id_Plan__id__in=plan_ids, created_at__month=current_month)
+            # Utilizar id_Plan__plans__date_start para obtener la fecha de inicio del plan
+            plan_ids = Domain.objects.filter(id_Distributor__in=distributors.values_list('id')).values_list('id_Plan__plans__id', flat=True)
+            domains_in_month = Domain.objects.filter(id_Plan__plans__id__in=plan_ids, id_Plan__plans__date_start__month=current_month)
 
             # Paso 3: Armar un XML con eso
             xml_content = build_xml_from_data(distributors, domains_in_month)
