@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render
 from .models import Employee, Ticket
 from .serializers import Employee_Serializer
@@ -62,28 +63,30 @@ def Ticket_view(request, *args, **kwargs):
         return JsonResponse(serializer.data,safe=False)
 
     elif request.method == 'POST':
+        try:
+            request_data = JSONParser().parse(request)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+
         client_id = request.GET.get('id')
         if client_id:
-            request_data = JSONParser().parse(request)
             user = Client.objects.filter(
                 id__in=[client_id]
-            ).first()  # Usar .first() para obtener el primer objeto del conjunto de consultas
+            ).first()
             if user:
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request_data['solucion'],
+                    body=request_data.get('solucion', ''),  # Asegúrate de obtener el valor de 'solucion' correctamente
                     from_email=settings.EMAIL_HOST_USER,
-                    to=[user.mail], 
+                    to=[user.mail],
                 )
                 email.send()
             else:
-                # Manejar el caso donde no se encuentra un cliente con el ID proporcionado
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Mover esta parte fuera del bloque else para asegurarse de que se ejecute siempre
-        request_data = JSONParser().parse(request)
         serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
