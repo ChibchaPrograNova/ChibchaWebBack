@@ -230,9 +230,12 @@ def xml_report(request):
         for distributor in distributors:
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
-            ET.SubElement(distributor_element, "domains").text = ",".join(
-                domain.name for domain in domains_in_month.filter(id_Distributor=distributor)
-            )
+
+            # Agregar los nombres de los dominios para este distribuidor
+            domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
+            for domain in domains_for_distributor:
+                domain_element = ET.SubElement(distributor_element, "domain")
+                ET.SubElement(domain_element, "name").text = domain.name
 
         # Convertir el árbol XML a una cadena y devolverlo como respuesta
         xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
