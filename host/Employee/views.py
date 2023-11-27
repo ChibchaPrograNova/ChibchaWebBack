@@ -65,7 +65,7 @@ def Ticket_view(request, *args, **kwargs):
         client_id = request.GET.get('id')
         if client_id:
             request_data=JSONParser().parse(request)
-            user = Client.objects.filer(
+            user = Client.objects.filter(
                 id_Client = id
             )
             email = EmailMessage(
