@@ -2,7 +2,7 @@ import random
 from django.shortcuts import render
 import json
 from django.http import HttpResponse
-from datetime import datetime
+from django.utils import timezone
 from xml.etree import ElementTree as ET
 import traceback
 from  Client.serializers import Plan_Serializer
@@ -14,6 +14,7 @@ from .serializers import Executive_Serializer
 from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -209,47 +210,29 @@ def search_Plan(request, *args, **kwargs):
             serializer = Plan_Serializer(plans, many=True)
             return JsonResponse(serializer.data, safe=False)
 
-def distributor_data_for_xml(request, *args, **kwargs):
+#@csrf_exempt
+def xml_report(request):
     if request.method == 'GET':
-        try:
-            # Paso 1: Traer todos los distribuidores asignados
-            distributors = Distributor.objects.all()
+        # Paso 1: Traer todos los distribuidores asignados
+        distributors = Distributor.objects.all()
 
-            # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
-            current_month = datetime.now().month
+        # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
+        current_month = timezone.now().month
+        domains_in_month = Domain.objects.filter(
+            id_Distributor__in=distributors,
+            created_at__month=current_month
+        )
 
-            # Utilizar el campo de fecha de inicio del plan a través de la relación 'planclient'
-            plan_ids = PlanClient.objects.filter(client__in=distributors.values_list('id')).values_list('plan__id', flat=True)
-            domains_in_month = Domain.objects.filter(id_Plan__id__in=plan_ids, id_Plan__date_start__month=current_month)
-
-            # Paso 3: Armar un XML con eso
-            xml_content = build_xml_from_data(distributors, domains_in_month)
-
-            # Devolver el XML como respuesta
-            response = HttpResponse(xml_content, content_type='application/xml')
-            response['Content-Disposition'] = 'attachment; filename="data.xml"'
-            return response
-
-        except Exception as e:
-            traceback.print_exc()
-            return HttpResponseServerError(f"Error: {e}")
-
-    return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-def build_xml_from_data(distributors, domains):
-    try:
-        root = ET.Element('data')
+        # Paso 3: Armar un XML con eso
+        xml_root = ET.Element("report")
         
         for distributor in distributors:
-            distributor_element = ET.SubElement(root, 'distributor', name=distributor.name, id=str(distributor.id))
-            
-            for domain in domains.filter(id_Distributor=distributor.id):
-                domain_element = ET.SubElement(distributor_element, 'domain', name=domain.name, id=str(domain.id))
-    
-        xml_content = ET.tostring(root, encoding='utf-8').decode('utf-8')
-        
-        return xml_content
+            distributor_element = ET.SubElement(xml_root, "distributor")
+            ET.SubElement(distributor_element, "name").text = distributor.name
+            ET.SubElement(distributor_element, "total_domains").text = str(domains_in_month.filter(id_Distributor=distributor).count())
 
-    except Exception as e:
-        traceback.print_exc()
-        return ""
+        # Convertir el árbol XML a una cadena y devolverlo como respuesta
+        xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+        return HttpResponse(xml_string, content_type='application/xml')
+    else:
+        return HttpResponse(status=405)
