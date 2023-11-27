@@ -17,6 +17,8 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+from django.core.mail import send_mail
+from django.conf import settings
 import io
 
 
@@ -252,6 +254,12 @@ def xml_report(request):
 
             # Enviar el contenido del archivo ZIP como respuesta HTTP
             zip_buffer.seek(0)
+            send_mail(
+                subject='pruebaCorreo'
+                message=zip_buffer.read()
+                from_email=settings.Email_HOST_USER,
+                recipient_list=['andres.gamba2011@gmail.com']
+            )
             response.write(zip_buffer.read())
 
         return response
