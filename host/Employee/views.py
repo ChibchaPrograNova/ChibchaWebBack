@@ -64,9 +64,9 @@ def Ticket_view(request, *args, **kwargs):
     elif request.method == 'POST':
         client_id = request.GET.get('id')
         if client_id:
-            request_data=JSONParser().parse(request)
+            request_data = JSONParser().parse(request)
             user = Client.objects.filter(
-                id_Client = id
+                id__in=[client_id]
             )
             email = EmailMessage(
                 subject='Respuesta a su solicitud de ayuda',
@@ -75,10 +75,12 @@ def Ticket_view(request, *args, **kwargs):
                 to=[user.mail], 
             )
             email.send()
-        request_data=JSONParser().parse(request)
-        serializer=Ticket_Serializer(data=request_data)
+
+        request_data = JSONParser().parse(request)
+        serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data,status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
    
