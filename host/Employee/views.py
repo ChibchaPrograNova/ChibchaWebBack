@@ -5,6 +5,9 @@ from .serializers import Ticket_Serializer
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.parsers import JSONParser
+from django.core.mail import EmailMessage
+from django.conf import settings
+from Client.models import Client
 
 # Create your views here.
 def Employee_view(request, *args, **kwargs):
@@ -57,10 +60,25 @@ def Ticket_view(request, *args, **kwargs):
         Tickets = Ticket.objects.all()
         serializer=Ticket_Serializer(Tickets,many=True)
         return JsonResponse(serializer.data,safe=False)
-    if request.method == 'POST':
+
+    elif request.method == 'POST':
+        client_id = request.GET.get('id')
+        if client_id:
+            request_data=JSONParser().parse(request)
+            user = Client.objects.filer(
+                id_Client = id
+            )
+            email = EmailMessage(
+                subject='Respuesta a su solicitud de ayuda',
+                body=request_data.solucion,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[user.mail], 
+            )
+            email.send()
         request_data=JSONParser().parse(request)
         serializer=Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+   
