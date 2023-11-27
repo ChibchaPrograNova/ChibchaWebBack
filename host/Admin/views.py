@@ -217,8 +217,54 @@ def search_Plan(request, *args, **kwargs):
 
 #@csrf_exempt
 def xml_report(request):
+    # if request.method == 'GET':
+    #     # Paso 1: Traer todos los distribuidores asignados
+    #     distributors = Distributor.objects.all()
+
+    #     # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
+    #     current_month = datetime.now().month
+    #     domains_in_month = Domain.objects.filter(
+    #         id_Distributor__in=distributors,
+    #         id_Plan__date_start__month=current_month
+    #     )
+
+    #     # Paso 3: Generar un archivo XML por cada distribuidor y enviar como respuesta HTTP
+    #     response = HttpResponse(content_type='application/zip')
+    #     response['Content-Disposition'] = 'attachment; filename=xml_reports.zip'
+
+    #     with io.BytesIO() as zip_buffer:
+    #         with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
+    #             for distributor in distributors:
+    #                 xml_root = ET.Element("report")
+    #                 distributor_element = ET.SubElement(xml_root, "distributor")
+    #                 ET.SubElement(distributor_element, "name").text = distributor.name
+
+    #                 # Agregar los nombres de los dominios para este distribuidor
+    #                 domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
+    #                 for domain in domains_for_distributor:
+    #                     domain_element = ET.SubElement(distributor_element, "domain")
+    #                     ET.SubElement(domain_element, "name").text = domain.name
+
+    #                 # Convertir el árbol XML a una cadena
+    #                 xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+
+    #                 # Agregar el archivo XML al archivo ZIP
+    #                 xml_filename = f"{distributor.name}_report.xml"
+    #                 zip_file.writestr(xml_filename, xml_string)
+
+    #         # Enviar el contenido del archivo ZIP como respuesta HTTP
+    #         zip_buffer.seek(0)
+    #         send_mail(
+    #             subject='pruebaCorreo',
+    #             message='XDXDXD',
+    #             from_email=settings.EMAIL_HOST_USER,
+    #             recipient_list=['andres.gamba2011@gmail.com'],
+    #         )
+    #         response.write(zip_buffer.read())
+
+    #     return response
     if request.method == 'GET':
-        # Paso 1: Traer todos los distribuidores asignados
+    # Paso 1: Traer todos los distribuidores asignados
         distributors = Distributor.objects.all()
 
         # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
@@ -228,40 +274,38 @@ def xml_report(request):
             id_Plan__date_start__month=current_month
         )
 
-        # Paso 3: Generar un archivo XML por cada distribuidor y enviar como respuesta HTTP
-        response = HttpResponse(content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename=xml_reports.zip'
+        # Crear un diccionario para almacenar los archivos XML y las direcciones de correo electrónico
+        xml_files = {}
 
-        with io.BytesIO() as zip_buffer:
-            with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
-                for distributor in distributors:
-                    xml_root = ET.Element("report")
-                    distributor_element = ET.SubElement(xml_root, "distributor")
-                    ET.SubElement(distributor_element, "name").text = distributor.name
+        for distributor in distributors:
+            xml_root = ET.Element("report")
+            distributor_element = ET.SubElement(xml_root, "distributor")
+            ET.SubElement(distributor_element, "name").text = distributor.name
 
-                    # Agregar los nombres de los dominios para este distribuidor
-                    domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
-                    for domain in domains_for_distributor:
-                        domain_element = ET.SubElement(distributor_element, "domain")
-                        ET.SubElement(domain_element, "name").text = domain.name
+            # Agregar los nombres de los dominios para este distribuidor
+            domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
+            for domain in domains_for_distributor:
+                domain_element = ET.SubElement(distributor_element, "domain")
+                ET.SubElement(domain_element, "name").text = domain.name
 
-                    # Convertir el árbol XML a una cadena
-                    xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+            # Convertir el árbol XML a una cadena
+            xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
 
-                    # Agregar el archivo XML al archivo ZIP
-                    xml_filename = f"{distributor.name}_report.xml"
-                    zip_file.writestr(xml_filename, xml_string)
+            # Agregar el archivo XML al diccionario
+            xml_files[f"{distributor.name}_report.xml"] = xml_string
 
-            # Enviar el contenido del archivo ZIP como respuesta HTTP
-            zip_buffer.seek(0)
-            send_mail(
-                subject='pruebaCorreo',
-                message='XDXDXD',
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=['andres.gamba2011@gmail.com'],
-            )
-            response.write(zip_buffer.read())
+        # Enviar el correo electrónico a cada distribuidor con el archivo XML adjunto
+        for distributor in distributors:
+            xml_filename = f"{distributor.name}_report.xml"
+            xml_string = xml_files.get(xml_filename, '')
 
-        return response
-    else:
-        return HttpResponse(status=405)
+            if xml_string:
+                send_mail(
+                    subject='Informe Mensual',
+                    message='Adjunto encontrarás el informe mensual en formato XML.',
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[distributor.email],  # Asegúrate de tener un campo 'email' en tu modelo Distributor
+                    attachments=[(xml_filename, xml_string, 'application/xml')],
+                )
+
+        return HttpResponse("Correo(s) enviado(s) con éxito.")
