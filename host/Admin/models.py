@@ -1,3 +1,4 @@
+from django.utils import timezone  # Cambia esta línea
 from django.db import models
 from Client.models import Client,Plan
 
@@ -37,5 +38,6 @@ class Domain(models.Model):
     available= models.BooleanField(default=True)
     plataform= models.CharField(max_length=100,choices=PLATAFORM_TYPE,default='')
     description = models.TextField(default='', null=True, blank=True)
+
     def __str__(self):
         return self.name

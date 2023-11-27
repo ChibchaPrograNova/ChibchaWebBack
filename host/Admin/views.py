@@ -1,13 +1,21 @@
 import random
 from django.shortcuts import render
 import json
+from django.http import HttpResponse
+from django.utils import timezone
+from xml.etree import ElementTree as ET
+import traceback
+from  Client.serializers import Plan_Serializer
 from .models import Distributor, Domain,Executive
+from Client.models import Plan, PlanClient
 from .serializers import Distributor_Serializer
 from .serializers import Domain_Serializer
 from .serializers import Executive_Serializer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
 
 # Create your views here.
@@ -90,26 +98,14 @@ def Domain_view(request, *args, **kwargs):
         Domains = Domain.objects.all()
         serializer = Domain_Serializer(Domains, many=True)
         return JsonResponse(serializer.data, safe=False)
-    elif request.method == 'GET':
-        idClient = request.GET.get('idClient')
-        if idClient:
-            try:
-                domain = Domain.objects.get(id_Client=idClient)
-                serializer = Domain_Serializer(domain,many=True)
-                return JsonResponse(serializer.data, safe=False)
-            except Domain.DoesNotExist:
-                return JsonResponse({'error': 'Dominios no encontrado'}, status=status.HTTP_404_NOT_FOUND)       
-        Domains = Domain.objects.all()
-        serializer = Domain_Serializer(Domains, many=True)
-        return JsonResponse(serializer.data, safe=False)    
-    elif request.method == 'POST':
+    if request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Domain_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         domain_id = request.GET.get('id')
         if domain_id:
             try:
@@ -149,7 +145,6 @@ def Process_view(request):
         extensions = ['.co', '.eu', '.bz', '.org', '.com', '.pe']
 
         for extension in extensions:
-            # Seleccionamos un distribuidor aleatorio y lo eliminamos de la lista
             selected_distributor = random.choice(distributors)
             domain_with_extension = domain_name + extension
 
@@ -169,3 +164,78 @@ def Process_view(request):
         return JsonResponse(created_domains, status=status.HTTP_200_OK, safe=False)
 
     return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def search_Domain(request, *args, **kwargs):
+    if request.method == 'GET':
+        idClient = request.GET.get('idClient')
+
+        if idClient:
+            try:
+                domains = Domain.objects.filter(id_Client=idClient)
+                
+                if domains.exists():
+                    serializer = Domain_Serializer(domains, many=True)
+                    return JsonResponse(serializer.data, safe=False)
+                else:
+                    return JsonResponse({'error': 'No se encontraron dominios para el cliente dado'}, status=status.HTTP_404_NOT_FOUND)
+
+            except Domain.DoesNotExist:
+                return JsonResponse({'error': 'Error al buscar dominios'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            # No se proporcionó un idClient, devolver todos los dominios
+            domains = Domain.objects.all()
+            serializer = Domain_Serializer(domains, many=True)
+            return JsonResponse(serializer.data, safe=False)
+
+def search_Plan(request, *args, **kwargs):
+    if request.method == 'GET':
+        idPlan = request.GET.get('idPlan')
+        if idPlan:
+            try:
+                # Utiliza filter(id=idPlan) directamente para buscar por el id exacto
+                plans = Plan.objects.filter(id=idPlan)
+
+                if plans.exists():
+                    serializer = Plan_Serializer(plans, many=True)
+                    return JsonResponse(serializer.data, safe=False)
+                else:
+                    return JsonResponse({'error': 'No se encontraron planes para el plan dado'}, status=status.HTTP_404_NOT_FOUND)
+
+            except Plan.DoesNotExist:
+                return JsonResponse({'error': 'Error al buscar planes'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            # No se proporcionó un idPlan, devolver todos los planes
+            plans = Plan.objects.all()
+            serializer = Plan_Serializer(plans, many=True)
+            return JsonResponse(serializer.data, safe=False)
+
+#@csrf_exempt
+def xml_report(request):
+    if request.method == 'GET':
+        # Paso 1: Traer todos los distribuidores asignados
+        distributors = Distributor.objects.all()
+
+        # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
+        current_month = datetime.now().month
+        domains_in_month = Domain.objects.filter(
+            id_Distributor__in=distributors,
+            id_Plan__date_start__month=current_month
+        )
+
+        # Paso 3: Armar un XML con eso
+        xml_root = ET.Element("report")
+
+        for distributor in distributors:
+            distributor_element = ET.SubElement(xml_root, "distributor")
+            ET.SubElement(distributor_element, "name").text = distributor.name
+            ET.SubElement(distributor_element, "total_domains").text = str(
+                domains_in_month.filter(id_Distributor=distributor).count()
+            )
+
+        # Convertir el árbol XML a una cadena y devolverlo como respuesta
+        xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+        return HttpResponse(xml_string, content_type='application/xml')
+    else:
+        return HttpResponse(status=405)
