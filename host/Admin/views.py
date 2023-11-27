@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from django.core.mail import EmailMessage
 from django.conf import settings
-import io
+from django.shortcuts import get_object_or_404
 
 
 # Create your views here.
@@ -263,3 +263,18 @@ def xml_report(request):
                 email.send()
 
         return HttpResponse("Correo(s) enviado(s) con éxito.")
+
+def calculate_commission(request, distributor_id):
+    # Obtén el distribuidor o devuelve un error 404 si no existe
+    distributor = get_object_or_404(Distributor, id=distributor_id)
+
+    # Calcula la comisión utilizando el método en el modelo Distributor
+    commission = distributor.calculate_commission()
+
+    # Puedes devolver la comisión como JSON en la respuesta
+    response_data = {
+        'distributor_name': distributor.name,
+        'commission': commission,
+    }
+
+    return JsonResponse(response_data)
