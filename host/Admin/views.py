@@ -257,7 +257,7 @@ def xml_report(request):
             send_mail(
                 subject='pruebaCorreo',
                 message='XDXDXD',
-                from_email=settings.Email_HOST_USER,
+                from_email=settings.EMAIL_HOST_USER,
                 recipient_list=['andres.gamba2011@gmail.com'],
             )
             response.write(zip_buffer.read())
