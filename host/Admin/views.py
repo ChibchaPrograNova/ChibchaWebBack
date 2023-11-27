@@ -224,10 +224,9 @@ def xml_report(request):
             id_Plan__date_start__month=current_month
         )
 
-        # Paso 3: Armar un XML con eso
-        xml_root = ET.Element("report")
-
+        # Paso 3: Generar un archivo XML por cada distribuidor
         for distributor in distributors:
+            xml_root = ET.Element("report")
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
 
@@ -237,8 +236,12 @@ def xml_report(request):
                 domain_element = ET.SubElement(distributor_element, "domain")
                 ET.SubElement(domain_element, "name").text = domain.name
 
-        # Convertir el árbol XML a una cadena y devolverlo como respuesta
-        xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
-        return HttpResponse(xml_string, content_type='application/xml')
+            # Crear un archivo XML separado para cada distribuidor
+            xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+            filename = f"{distributor.name}_report.xml"
+            with open(filename, "w") as xml_file:
+                xml_file.write(xml_string)
+
+        return HttpResponse("Archivos XML generados correctamente.")
     else:
         return HttpResponse(status=405)
