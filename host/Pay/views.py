@@ -35,24 +35,27 @@ def Pay_view(request, *args, **kwargs):
             return JsonResponse(serializer.data,status=status.HTTP_200_OK)
         return JsonResponse(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+# En views.py de la app Pay
 def calculate_commissions(request):
     if request.method == 'POST':
         request_data = JSONParser().parse(request)
-        
+
         try:
             client_id = request_data['id_Client']
             client = Client.objects.get(pk=client_id)
-            distributor = client.distributor_set.first()
             
+            # Obtén el distribuidor a través de la relación con Pay
+            distributor = client.pay_set.first().id_Distributor if client.pay_set.exists() else None
+
             if distributor:
                 commission_percentage = 0.10 if distributor.category == 'Básico' else 0.15
                 commission = request_data['amount'] * commission_percentage
-                
+
                 # Aquí puedes implementar la lógica específica para separar las comisiones
                 # En este ejemplo, simplemente se imprime la comisión calculada
                 print(f"Comisión total: {commission}")
                 print(f"Comisión para {distributor.name}: {commission}")
-                
+
                 return JsonResponse({'message': 'Comisiones calculadas correctamente.'}, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({'error': 'El cliente no tiene un distribuidor asociado.'}, status=status.HTTP_400_BAD_REQUEST)
