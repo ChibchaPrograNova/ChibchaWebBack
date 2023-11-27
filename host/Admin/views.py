@@ -255,10 +255,10 @@ def xml_report(request):
             # Enviar el contenido del archivo ZIP como respuesta HTTP
             zip_buffer.seek(0)
             send_mail(
-                subject='pruebaCorreo'
-                message='XDXDXD'
+                subject='pruebaCorreo',
+                message='XDXDXD',
                 from_email=settings.Email_HOST_USER,
-                recipient_list=['andres.gamba2011@gmail.com']
+                recipient_list=['andres.gamba2011@gmail.com'],
             )
             response.write(zip_buffer.read())
 
