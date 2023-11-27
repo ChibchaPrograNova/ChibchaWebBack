@@ -221,7 +221,7 @@ def xml_report(request):
         current_month = datetime.now().month
         domains_in_month = Domain.objects.filter(
             id_Distributor__in=distributors,
-            id_Client__plans__planclient__date_start__month=current_month
+            id_Client__plans__date_start__month=current_month
         )
 
         # Paso 3: Armar un XML con eso
