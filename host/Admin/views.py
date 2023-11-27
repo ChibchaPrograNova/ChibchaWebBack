@@ -15,6 +15,7 @@ from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
 
 # Create your views here.
@@ -217,19 +218,21 @@ def xml_report(request):
         distributors = Distributor.objects.all()
 
         # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
-        current_month = timezone.now().month
+        current_month = datetime.now().month
         domains_in_month = Domain.objects.filter(
             id_Distributor__in=distributors,
-            created_at__month=current_month
+            id_Client__plans__planclient__date_start__month=current_month
         )
 
         # Paso 3: Armar un XML con eso
         xml_root = ET.Element("report")
-        
+
         for distributor in distributors:
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
-            ET.SubElement(distributor_element, "total_domains").text = str(domains_in_month.filter(id_Distributor=distributor).count())
+            ET.SubElement(distributor_element, "total_domains").text = str(
+                domains_in_month.filter(id_Distributor=distributor).count()
+            )
 
         # Convertir el árbol XML a una cadena y devolverlo como respuesta
         xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
