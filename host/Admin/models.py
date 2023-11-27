@@ -25,17 +25,6 @@ class Distributor(models.Model):
     activate= models.BooleanField(default=True)
     def __str__(self):
         return self.name
-    def calculate_commission(self):
-        total_commission = 0
-
-        # Obtén todos los dominios asociados al distribuidor
-        domains = Domain.objects.filter(id_Distributor=self)
-
-        # Calcular la comisión para cada dominio y sumarla al total
-        for domain in domains:
-            total_commission += domain.id_Plan.price * (0.15 if self.category == 'Premium' else 0.1)
-
-        return total_commission
     
 class Domain(models.Model):
     PLATAFORM_TYPE = [
