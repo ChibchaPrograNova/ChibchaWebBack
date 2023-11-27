@@ -67,20 +67,20 @@ def Ticket_view(request, *args, **kwargs):
             request_data = JSONParser().parse(request)
             user = Client.objects.filter(
                 id__in=[client_id]
-            )
-            email = EmailMessage(
-                subject='Respuesta a su solicitud de ayuda',
-                body=request_data['solucion'],
-                from_email=settings.EMAIL_HOST_USER,
-                to=[user.mail], 
-            )
-            email.send()
-
-        request_data = JSONParser().parse(request)
-        serializer = Ticket_Serializer(data=request_data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-   
+            ).first()  # Usar .first() para obtener el primer objeto del conjunto de consultas
+            if user:
+                email = EmailMessage(
+                    subject='Respuesta a su solicitud de ayuda',
+                    body=request_data['solucion'],
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[user.mail], 
+                )
+                email.send()
+            else:
+                # Manejar el caso donde no se encuentra un cliente con el ID proporcionado
+                request_data = JSONParser().parse(request)
+                serializer = Ticket_Serializer(data=request_data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
