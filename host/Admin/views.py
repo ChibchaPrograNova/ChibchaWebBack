@@ -15,8 +15,6 @@ from django.http import JsonResponse, HttpResponseServerError
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime, timedelta
-
 
 
 # Create your views here.
@@ -218,29 +216,26 @@ def xml_report(request):
         # Paso 1: Traer todos los distribuidores asignados
         distributors = Distributor.objects.all()
 
-        # Paso 2: Hacer consulta en dominios registrados de los distribuidores en el mes actual
-        current_month = datetime.now().month
-        current_year = datetime.now().year
-
+        # Paso 2: Consulta en dominios registrados de los distribuidores en el mes actual
+        current_month = timezone.now().month
         domains_in_month = Domain.objects.filter(
             id_Distributor__in=distributors,
-            created_at__month=current_month,
-            created_at__year=current_year
+            created_at__month=current_month
         )
 
         # Paso 3: Armar un XML con eso
         xml_root = ET.Element("report")
-
+        
         for distributor in distributors:
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
 
-            # Agregar los dominios de este distribuidor al XML
-            distributor_domains = domains_in_month.filter(id_Distributor=distributor)
-            for domain in distributor_domains:
-                domain_element = ET.SubElement(distributor_element, "domain")
-                ET.SubElement(domain_element, "name").text = domain.name
-                ET.SubElement(domain_element, "plataform").text = domain.plataform
+            # Obtener los nombres de los dominios para este distribuidor en el mes actual
+            domain_names = domains_in_month.filter(id_Distributor=distributor).values_list('name', flat=True)
+
+            # Agregar los nombres de los dominios al XML
+            for domain_name in domain_names:
+                ET.SubElement(distributor_element, "domain").text = domain_name
 
         # Convertir el árbol XML a una cadena y devolverlo como respuesta
         xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
