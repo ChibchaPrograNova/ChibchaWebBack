@@ -229,13 +229,7 @@ def xml_report(request):
         for distributor in distributors:
             distributor_element = ET.SubElement(xml_root, "distributor")
             ET.SubElement(distributor_element, "name").text = distributor.name
-
-            # Obtener los nombres de los dominios para este distribuidor en el mes actual
-            domain_names = domains_in_month.filter(id_Distributor=distributor).values_list('name', flat=True)
-
-            # Agregar los nombres de los dominios al XML
-            for domain_name in domain_names:
-                ET.SubElement(distributor_element, "domain").text = domain_name
+            ET.SubElement(distributor_element, "total_domains").text = str(domains_in_month.filter(id_Distributor=distributor).count())
 
         # Convertir el árbol XML a una cadena y devolverlo como respuesta
         xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
