@@ -76,7 +76,7 @@ def Ticket_view(request, *args, **kwargs):
             if user:
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request_data.get('solucion', ''),  # Asegúrate de obtener el valor de 'solucion' correctamente
+                    body=request_data.get('solucion', ''),
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
@@ -84,9 +84,13 @@ def Ticket_view(request, *args, **kwargs):
             else:
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = Ticket_Serializer(data=request_data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Asegúrate de que el campo 'client' en request_data corresponda a la clave externa en tu modelo Ticket
+            request_data['client'] = user.id  # O ajusta esto según la relación entre los modelos Client y Ticket
+
+            serializer = Ticket_Serializer(data=request_data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
