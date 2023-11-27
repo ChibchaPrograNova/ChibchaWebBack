@@ -224,24 +224,34 @@ def xml_report(request):
             id_Plan__date_start__month=current_month
         )
 
-        # Paso 3: Generar un archivo XML por cada distribuidor
-        for distributor in distributors:
-            xml_root = ET.Element("report")
-            distributor_element = ET.SubElement(xml_root, "distributor")
-            ET.SubElement(distributor_element, "name").text = distributor.name
+        # Paso 3: Generar un archivo XML por cada distribuidor y enviar como respuesta HTTP
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=xml_reports.zip'
 
-            # Agregar los nombres de los dominios para este distribuidor
-            domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
-            for domain in domains_for_distributor:
-                domain_element = ET.SubElement(distributor_element, "domain")
-                ET.SubElement(domain_element, "name").text = domain.name
+        with io.BytesIO() as zip_buffer:
+            with zipfile.ZipFile(zip_buffer, 'a') as zip_file:
+                for distributor in distributors:
+                    xml_root = ET.Element("report")
+                    distributor_element = ET.SubElement(xml_root, "distributor")
+                    ET.SubElement(distributor_element, "name").text = distributor.name
 
-            # Crear un archivo XML separado para cada distribuidor
-            xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
-            filename = f"{distributor.name}_report.xml"
-            with open(filename, "w") as xml_file:
-                xml_file.write(xml_string)
+                    # Agregar los nombres de los dominios para este distribuidor
+                    domains_for_distributor = domains_in_month.filter(id_Distributor=distributor)
+                    for domain in domains_for_distributor:
+                        domain_element = ET.SubElement(distributor_element, "domain")
+                        ET.SubElement(domain_element, "name").text = domain.name
 
-        return HttpResponse("Archivos XML generados correctamente.")
+                    # Convertir el árbol XML a una cadena
+                    xml_string = ET.tostring(xml_root, encoding='utf-8').decode('utf-8')
+
+                    # Agregar el archivo XML al archivo ZIP
+                    xml_filename = f"{distributor.name}_report.xml"
+                    zip_file.writestr(xml_filename, xml_string)
+
+            # Enviar el contenido del archivo ZIP como respuesta HTTP
+            zip_buffer.seek(0)
+            response.write(zip_buffer.read())
+
+        return response
     else:
         return HttpResponse(status=405)
