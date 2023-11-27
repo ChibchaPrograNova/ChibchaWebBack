@@ -26,8 +26,6 @@ class Pay(models.Model):
     amount= models.IntegerField(default=0)
     type= models.CharField(max_length=200,choices=PAY_TYPES,default='')
     date= models.DateTimeField(default=timezone.now)
-    id_Distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE, null=True, blank=True)
-
     def __str__(self):
         return str(self.id_Client) + " - " + str(self.id_Card)
     
