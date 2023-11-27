@@ -43,9 +43,13 @@ def calculate_commissions(request):
         try:
             client_id = request_data['id_Client']
             client = Client.objects.get(pk=client_id)
-            
-            # Obtén el distribuidor a través de la relación con Pay
-            distributor = client.pay_set.first().id_Distributor if client.pay_set.exists() else None
+
+            # Imprime información para depurar
+            print(f"Client ID: {client_id}")
+
+            # Obtén el distribuidor a través de la relación con PlanClient
+            plan_client = client.planclient_set.first()
+            distributor = plan_client.plan.id_Distributor if plan_client else None
 
             if distributor:
                 commission_percentage = 0.10 if distributor.category == 'Básico' else 0.15
@@ -63,3 +67,4 @@ def calculate_commissions(request):
             return JsonResponse({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return JsonResponse({'error': 'Método no permitido.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
