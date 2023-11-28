@@ -8,8 +8,7 @@ from django.utils import timezone
 class Card(models.Model):
     id_Client = models.ForeignKey(Client, on_delete=models.CASCADE)
     number= models.CharField(max_length=200,default='',null=True,blank=True)
-    type= models.CharField(max_length=200,default='',null=True,blank=True)
-    d_expiration= models.DateTimeField(default=timezone.now)
+    ccv= models.IntegerField(default=0)
 
     def __str__(self):
         return self.number
