@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 from django.shortcuts import render
 from .models import Card, Pay
 from .serializers import Card_Serializer
@@ -8,7 +8,6 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 import csv
 from django.http import HttpResponse
-
 
 # Create your views here.
 def Card_view(request, *args, **kwargs):
