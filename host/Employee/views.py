@@ -64,31 +64,33 @@ def Ticket_view(request, *args, **kwargs):
 
     elif request.method == 'POST':
         try:
+            # Utilizamos JSONParser desde rest_framework
             request_data = JSONParser().parse(request)
-        except ValueError:
+        except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Obtener el cliente directamente del request_data
-        user = Client.objects.filter(id=request_data.get('client')).first()
+        client_id = request_data.get('client')
+        if not client_id:
+            return JsonResponse({'error': 'Campo "client" faltante en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = Client.objects.filter(id=client_id).first()
         if not user:
             return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        request_data['client'] = user.id
 
         serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
 
             # Envía un correo electrónico después de guardar el ticket
-            try:
-                email = EmailMessage(
-                    subject='Respuesta a su solicitud de ayuda',
-                    body=request_data.get('solucion', ''),
-                    from_email=settings.EMAIL_HOST_USER,
-                    to=[user.mail],
-                )
-                email.send()
-            except Exception as e:
-                print(f"Error sending email: {str(e)}")
-
+            email = EmailMessage(
+                subject='Respuesta a su solicitud de ayuda',
+                body=request_data.get('solucion', ''),
+                from_email=settings.EMAIL_HOST_USER,
+                to=[user.mail],
+            )
+            email.send()
 
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
