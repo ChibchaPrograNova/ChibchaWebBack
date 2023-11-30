@@ -88,7 +88,7 @@ def Ticket_view(request, *args, **kwargs):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
-                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse({'error': 'Error al enviar el correo'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
