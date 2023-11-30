@@ -67,18 +67,17 @@ def Ticket_view(request, *args, **kwargs):
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-        client_id = request_data.get('client')
+        client_id = request_data.get('id')
         if(client_id):
 
             user = Client.objects.filter(id=client_id).first()
             if not user:
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-            request_data['client'] = user.id
 
             try:
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request_data['solucion'],
+                    body=request_data.get('solucion', ''),
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
