@@ -65,18 +65,13 @@ def Ticket_view(request, *args, **kwargs):
     elif request.method == 'POST':
         try:
             request_data = JSONParser().parse(request)
-        except json.JSONDecodeError:
+        except ValueError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
-        client_id = request.GET.get('id')
-        if not client_id:
-            return JsonResponse({'error': 'Parámetro "id" faltante'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = Client.objects.filter(id__in=[client_id]).first()
+        # Obtener el cliente directamente del request_data
+        user = Client.objects.filter(id=request_data.get('client')).first()
         if not user:
             return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-        request_data['client'] = user.id
 
         serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
@@ -96,4 +91,3 @@ def Ticket_view(request, *args, **kwargs):
 
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
