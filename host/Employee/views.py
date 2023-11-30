@@ -69,26 +69,31 @@ def Ticket_view(request, *args, **kwargs):
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
         client_id = request.GET.get('id')
-        if client_id:
-            user = Client.objects.filter(
-                id__in=[client_id]
-            ).first()
-            if not user:
-                return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        if not client_id:
+            return JsonResponse({'error': 'Parámetro "id" faltante'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Asegúrate de que el campo 'client' en request_data corresponda a la clave externa en tu modelo Ticket
-            request_data['client'] = user.id  # O ajusta esto según la relación entre los modelos Client y Ticket
+        user = Client.objects.filter(id__in=[client_id]).first()
+        if not user:
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = Ticket_Serializer(data=request_data)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        request_data['client'] = user.id
 
-        else:
-            return JsonResponse({'error': 'Parámetro de cliente faltante'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = Ticket_Serializer(data=request_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            # Envía un correo electrónico después de guardar el ticket
+            email = EmailMessage(
+                subject='Respuesta a su solicitud de ayuda',
+                body=request_data.get('solucion', ''),
+                from_email=settings.EMAIL_HOST_USER,
+                to=[user.mail],
+            )
+            email.send()
+
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
 
