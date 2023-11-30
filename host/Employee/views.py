@@ -60,16 +60,8 @@ def Ticket_view(request, *args, **kwargs):
         return JsonResponse(serializer.data, safe=False)
 
     elif request.method == 'POST':
-        try:
-            # Utilizamos JSONParser desde rest_framework
-            request_data = JSONParser().parse(request)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
-
-#
-        client_id = request_data.get('id')
+        client_id = request.get('id')
         if(client_id):
-
             user = Client.objects.filter(id=client_id).first()
             if not user:
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
@@ -77,18 +69,18 @@ def Ticket_view(request, *args, **kwargs):
             try:
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request_data.get('solucion', ''),
+                    body=request.get('solucion'),
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
                 email.send()
             except Exception as e:
-                # Registra la excepción en los logs
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
                 return JsonResponse({'error': 'Error al enviar el correo'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = Ticket_Serializer(data=request_data)
+        request_data=JSONParser().parse(request)
+        serializer=Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
