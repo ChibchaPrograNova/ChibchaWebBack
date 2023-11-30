@@ -79,7 +79,7 @@ def Ticket_view(request, *args, **kwargs):
                     to=[user.mail],
                 )
                 email.send()
-                return JsonResponse({'Done':'Email Enviado'}, status=status.HTTP_201_CREATED)
+                return JsonResponse({'Done':'Email Enviado'}, status=status.HTTP_200_OK)
             except Exception as e:
                 import logging
                 logger = logging.getLogger(__name__)
