@@ -20,7 +20,7 @@ class Distributor(models.Model):
     address= models.CharField(max_length=100,default='',null=True,blank=True)
     mail= models.CharField(max_length=100,default='',null=True,blank=True)
     q_domains= models.IntegerField(default=0)
-    category= models.CharField(max_length=20,choices=DISTRIBUTOR_CATEGORY,default='')
+    category= models.CharField(max_length=20,choices=DISTRIBUTOR_CATEGORY,default='Básico')
     bank_account= models.CharField(max_length=20,default='',null=True,blank=True)
     activate= models.BooleanField(default=True)
     def __str__(self):
