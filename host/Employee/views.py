@@ -66,7 +66,7 @@ def Ticket_view(request, *args, **kwargs):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+#
         client_id = request_data.get('id')
         if(client_id):
 
