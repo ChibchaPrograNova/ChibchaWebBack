@@ -78,13 +78,17 @@ def Ticket_view(request, *args, **kwargs):
             serializer.save()
 
             # Envía un correo electrónico después de guardar el ticket
-            email = EmailMessage(
-                subject='Respuesta a su solicitud de ayuda',
-                body=request_data.get('solucion', ''),
-                from_email=settings.EMAIL_HOST_USER,
-                to=[user.mail],
-            )
-            email.send()
+            try:
+                email = EmailMessage(
+                    subject='Respuesta a su solicitud de ayuda',
+                    body=request_data.get('solucion', ''),
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[user.mail],
+                )
+                email.send()
+            except Exception as e:
+                print(f"Error sending email: {str(e)}")
+
 
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
