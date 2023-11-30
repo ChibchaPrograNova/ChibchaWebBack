@@ -55,6 +55,11 @@ def Employee_view(request, *args, **kwargs):
     
 def Ticket_view(request, *args, **kwargs):
     if request.method == 'GET':
+        Tickets = Ticket.objects.all()
+        serializer = Ticket_Serializer(Tickets, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
         client_id = request.GET.get('id')
         if(client_id):
             user = Client.objects.filter(id=client_id).first()
@@ -62,9 +67,10 @@ def Ticket_view(request, *args, **kwargs):
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
             try:
+                request_data = JSONParser().parse(request)
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request.POST.get('solucion'),
+                    body=request_data.solucion,
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
@@ -74,10 +80,6 @@ def Ticket_view(request, *args, **kwargs):
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
                 return JsonResponse({'error': 'Error al enviar el correo'}, status=status.HTTP_400_BAD_REQUEST)
-        Tickets = Ticket.objects.all()
-        serializer = Ticket_Serializer(Tickets, many=True)
-        return JsonResponse(serializer.data, safe=False)
-    elif request.method == 'POST':
         request_data=JSONParser().parse(request)
         serializer=Ticket_Serializer(data=request_data)
         if serializer.is_valid():
