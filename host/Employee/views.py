@@ -66,26 +66,16 @@ def Ticket_view(request, *args, **kwargs):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
+
         client_id = request_data.get('client')
-        if not client_id:
-            return JsonResponse({'error': 'Campo "client" faltante en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+        if(client_id):
 
-        user = Client.objects.filter(id=client_id).first()
-        if not user:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-        request_data['client'] = user.id
-
-        # Asegurémonos de que el campo 'solucion' esté presente en la solicitud
-        if 'solucion' not in request_data:
-            return JsonResponse({'error': 'Campo "solucion" faltante en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = Ticket_Serializer(data=request_data)
-        if serializer.is_valid():
-            serializer.save()
+            user = Client.objects.filter(id=client_id).first()
+            if not user:
+                return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            request_data['client'] = user.id
 
             try:
-                # Envía un correo electrónico después de guardar el ticket
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
                     body=request_data['solucion'],
@@ -98,14 +88,10 @@ def Ticket_view(request, *args, **kwargs):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
-
+                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = Ticket_Serializer(data=request_data)
+        if serializer.is_valid():
+            serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    
-
-    
-    
-  
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
