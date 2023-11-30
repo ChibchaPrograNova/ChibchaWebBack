@@ -79,6 +79,10 @@ def Ticket_view(request, *args, **kwargs):
 
         request_data['client'] = user.id
 
+        # Asegurémonos de que el campo 'solucion' esté presente en la solicitud
+        if 'solucion' not in request_data:
+            return JsonResponse({'error': 'Campo "solucion" faltante en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
@@ -86,7 +90,7 @@ def Ticket_view(request, *args, **kwargs):
             # Envía un correo electrónico después de guardar el ticket
             email = EmailMessage(
                 subject='Respuesta a su solicitud de ayuda',
-                body=request_data.get('solucion', ''),
+                body=request_data['solucion'],
                 from_email=settings.EMAIL_HOST_USER,
                 to=[user.mail],
             )
