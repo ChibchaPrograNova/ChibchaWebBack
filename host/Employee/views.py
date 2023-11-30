@@ -60,12 +60,12 @@ def Ticket_view(request, *args, **kwargs):
         return JsonResponse(serializer.data, safe=False)
 
     elif request.method == 'POST':
-        client_id = request.GET.get('id')
         try:
             request_data = JSONParser().parse(request)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
+        client_id = request_data.get('id', '')
         if(client_id):
             user = Client.objects.filter(id=client_id).first()
             if not user:
