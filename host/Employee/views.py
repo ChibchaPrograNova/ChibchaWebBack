@@ -60,7 +60,7 @@ def Ticket_view(request, *args, **kwargs):
         return JsonResponse(serializer.data, safe=False)
 
     elif request.method == 'POST':
-        client_id = request.get('id')
+        client_id = request.POST.get('id')
         if(client_id):
             user = Client.objects.filter(id=client_id).first()
             if not user:
@@ -69,7 +69,7 @@ def Ticket_view(request, *args, **kwargs):
             try:
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request.get('solucion'),
+                    body=request.POST.get('solucion'),
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
