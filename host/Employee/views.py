@@ -65,7 +65,7 @@ def Ticket_view(request, *args, **kwargs):
             request_data = JSONParser().parse(request)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
         if(client_id):
             user = Client.objects.filter(id=client_id).first()
             if not user:
@@ -84,7 +84,6 @@ def Ticket_view(request, *args, **kwargs):
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
                 return JsonResponse({'error': 'Error al enviar el correo'}, status=status.HTTP_400_BAD_REQUEST)
-        request_data=JSONParser().parse(request)
         serializer=Ticket_Serializer(data=request_data)
         if serializer.is_valid():
             serializer.save()
