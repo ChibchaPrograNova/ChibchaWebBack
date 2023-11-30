@@ -59,8 +59,8 @@ def Employee_view(request, *args, **kwargs):
 def Ticket_view(request, *args, **kwargs):
     if request.method == 'GET':
         Tickets = Ticket.objects.all()
-        serializer=Ticket_Serializer(Tickets,many=True)
-        return JsonResponse(serializer.data,safe=False)
+        serializer = Ticket_Serializer(Tickets, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
     elif request.method == 'POST':
         try:
@@ -73,15 +73,7 @@ def Ticket_view(request, *args, **kwargs):
             user = Client.objects.filter(
                 id__in=[client_id]
             ).first()
-            if user:
-                email = EmailMessage(
-                    subject='Respuesta a su solicitud de ayuda',
-                    body=request_data.get('solucion', ''),
-                    from_email=settings.EMAIL_HOST_USER,
-                    to=[user.mail],
-                )
-                email.send()
-            else:
+            if not user:
                 return JsonResponse({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
             # Asegúrate de que el campo 'client' en request_data corresponda a la clave externa en tu modelo Ticket
@@ -92,5 +84,11 @@ def Ticket_view(request, *args, **kwargs):
                 serializer.save()
                 return JsonResponse(serializer.data, status=status.HTTP_200_OK)
             return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return JsonResponse({'error': 'Parámetro de cliente faltante'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 
