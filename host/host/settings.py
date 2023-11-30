@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-5jpfwsgcc+o3)z!h(yc92m)zbnig7xl$*bq87itf57*xavj1qi
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['chibchawebback-production-e6e7.up.railway.app']# settings.py
+ALLOWED_HOSTS = ['*']
 
 # settings.py
 
