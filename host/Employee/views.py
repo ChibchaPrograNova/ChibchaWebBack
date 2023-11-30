@@ -70,7 +70,7 @@ def Ticket_view(request, *args, **kwargs):
                 request_data = JSONParser().parse(request)
                 email = EmailMessage(
                     subject='Respuesta a su solicitud de ayuda',
-                    body=request_data.solucion,
+                    body=request_data.get('solucion', ''),
                     from_email=settings.EMAIL_HOST_USER,
                     to=[user.mail],
                 )
