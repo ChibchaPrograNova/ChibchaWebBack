@@ -65,7 +65,6 @@ def Ticket_view(request, *args, **kwargs):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error de formato JSON en la solicitud'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return JsonResponse(request_data,status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
         client_id = request_data.get('id')
         if(client_id):
             user = Client.objects.filter(id=client_id).first()
@@ -85,9 +84,10 @@ def Ticket_view(request, *args, **kwargs):
                 logger = logging.getLogger(__name__)
                 logger.error(f"Error al enviar correo electrónico: {str(e)}")
                 return JsonResponse({'error': 'Error al enviar el correo'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer=Ticket_Serializer(data=request_data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            serializer=Ticket_Serializer(data=request_data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
